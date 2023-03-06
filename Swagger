@@ -1,0 +1,1553 @@
+openapi: 3.0.3
+info:
+  title: Swagger ValuedIn - OpenAPI 3.0
+  description: Architecture course Restful API design by JMNTSI22 student group.
+  contact:
+    email: jmnts22@gmail.com
+  version: 1.0.11
+servers:
+  - url: https://valuedin.swagger.io/api/v3
+tags:
+  - name: auth
+    description: Operations for users credentials
+  - name: users
+    description: Operations for users management
+  - name: organizations
+    description: Operations for organizations management
+  - name: values
+    description: Operations for values management
+  - name: jobs
+    description: Operations for jobs management
+  - name: chats
+    description: Operations for chats management
+  - name: feed
+    description: Operations for feed management
+paths:
+  /auth:
+    get:
+      tags:
+      - auth
+      summary: Check authentication
+      description: Check authentication
+      operationId: checkAuth
+      responses:
+        '200':
+          description: Success
+          content:
+            text/plain:
+              schema:
+                "$ref": "#/components/schemas/TokenAndRole"
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/TokenAndRole"
+            text/json:
+              schema:
+                "$ref": "#/components/schemas/TokenAndRole"
+  /auth/register:
+    post:
+      tags:
+      - auth
+      summary: Register User account
+      description: Register User account
+      operationId: regUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/NewUser"
+          text/json:
+            schema:
+              "$ref": "#/components/schemas/NewUser"
+          application/*+json:
+            schema:
+              "$ref": "#/components/schemas/NewUser"
+      responses:
+        '200':
+          description: Success            
+  /auth/registerUser:
+    post:
+      tags:
+      - auth
+      summary: Register User account for System Admin
+      description: Register User account for System Admin
+      operationId: regSysUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/NewUser"
+          text/json:
+            schema:
+              "$ref": "#/components/schemas/NewUser"
+          application/*+json:
+            schema:
+              "$ref": "#/components/schemas/NewUser"
+      responses:
+        '200':
+          description: Success
+  /auth/login:
+    post:
+      tags:
+      - auth
+      summary: Login by user
+      description: Login by user
+      operationId: logUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/AuthRequest"
+          text/json:
+            schema:
+              "$ref": "#/components/schemas/AuthRequest"
+          application/*+json:
+            schema:
+              "$ref": "#/components/schemas/AuthRequest"
+      responses:
+        '200':
+          description: Success
+          content:
+            text/plain:
+              schema:
+                "$ref": "#/components/schemas/TokenAndRole"
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/TokenAndRole"
+            text/json:
+              schema:
+                "$ref": "#/components/schemas/TokenAndRole"
+  /auth/resetpassword:
+    post:
+      tags:
+        - auth
+      summary: Reset password
+      description: Reset the password for the user
+      operationId: resetPass
+      responses:
+        '200':
+          description: Success  
+          
+  /auth/changepassword:
+    post:
+      tags:
+        - auth
+      summary: Change password
+      description: This can only be done by the logged in user.
+      operationId: changePass       
+      responses:
+        '200':
+          description: Success
+          
+  
+  /users:
+    post:
+      tags:
+      - users
+      summary: List all Users
+      description: This can only be done by the logged in user.
+      operationId: listUsers
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/UserPageRequest"
+          text/json:
+            schema:
+              "$ref": "#/components/schemas/UserPageRequest"
+          application/*+json:
+            schema:
+              "$ref": "#/components/schemas/UserPageRequest"
+      responses:
+        '200':
+          description: Success
+          content:
+            text/plain:
+              schema:
+                "$ref": "#/components/schemas/UserSystemInfoPage"
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/UserSystemInfoPage"
+            text/json:
+              schema:
+                "$ref": "#/components/schemas/UserSystemInfoPage"
+                
+  # /users/feed:
+  #   post:
+  #     tags:
+  #       - users
+  #     summary: List all Feed elements of Users
+  #     description: This can only be done by the logged in user.
+  #     operationId: listFeedUsers
+  #     responses:
+  #       '200':
+  #         description: successful operation
+  #         content:
+  #           application/json:
+  #             schema:
+  #               type: object
+  #               additionalProperties:
+  #                 type: integer
+  #                 format: int32
+  #     security:
+  #       - api_key: []
+               
+  /users/{id}:
+    get:
+      tags:
+      - users
+      summary: View User
+      description: This can only be done by the logged in user.
+      operationId: viewUser
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            text/plain:
+              schema:
+                "$ref": "#/components/schemas/UserSystemInfo"
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/UserSystemInfo"
+            text/json:
+              schema:
+                "$ref": "#/components/schemas/UserSystemInfo"
+    put:
+      tags:
+      - users
+      summary: Update User
+      description: This can only be done by the logged in user.
+      operationId: updateUser
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/UpdatedUser"
+          text/json:
+            schema:
+              "$ref": "#/components/schemas/UpdatedUser"
+          application/*+json:
+            schema:
+              "$ref": "#/components/schemas/UpdatedUser"
+      responses:
+        '200':
+          description: Success
+         
+  /users/{id}/uploadcv:
+    post:
+      tags:
+        - users
+      summary: Upload CV for User
+      description: This can only be done by the logged in user.
+      operationId: uploadCV
+      parameters:
+        - name: id
+          in: path
+          description: ID of user to update
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: additionalMetadata
+          in: query
+          description: Additional Metadata
+          required: false
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/octet-stream:
+            schema:
+              type: string
+              format: binary
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+      security:
+        - valuedIn_auth:
+            - write:users
+            - read:users    
+            
+  /users/expire/{id}:
+    delete:
+      tags:
+      - users
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          
+  # /organizations:
+  #   post:
+  #     tags:
+  #       - organizations
+  #     summary: List all Organizations
+  #     description: List all Organizations
+  #     operationId: listOrg
+  #     responses:
+  #       '200':
+  #         description: successful operation
+  #         content:
+  #           application/json:
+  #             schema:
+  #               type: object
+  #               additionalProperties:
+  #                 type: integer
+  #                 format: int32
+  #     security:
+  #       - api_key: []  
+        
+  # /organizations/feed:
+  #   post:
+  #     tags:
+  #       - organizations
+  #     summary: List all Feed elements of Organizations
+  #     description: List all Feed elements of Organizations
+  #     operationId: listFeedOrg
+  #     responses:
+  #       '200':
+  #         description: successful operation
+  #         content:
+  #           application/json:
+  #             schema:
+  #               type: object
+  #               additionalProperties:
+  #                 type: integer
+  #                 format: int32
+  #     security:
+  #       - api_key: []  
+  
+  /organizations/create:
+    post:
+      tags:
+        - organizations
+      summary: Add a new organization to the social network
+      description: Add a new organization to the social network
+      operationId: createOrg
+      requestBody:
+        description: Create a new organization in the social network
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Organization'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/Organization'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Organization'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Organization'          
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Organization'
+        '405':
+          description: Invalid input
+      security:
+        - valuedIn_auth:
+            - write:organizations
+            - read:organizations 
+  /organizations/{id}:
+    get:
+      tags:
+        - organizations
+      summary: Find organization by ID
+      description: Returns a single organization
+      operationId: viewOrg
+      parameters:
+        - name: id
+          in: path
+          description: ID of organization to return
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Organization'          
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Organization'
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Organization not found
+      security:
+        - api_key: []
+        - valuedIn_auth:
+            - write:organizations
+            - read:organizations 
+    put:
+      tags:
+        - organizations
+      summary: Update Organization
+      description: Update an existing organization by Id
+      operationId: updateOrg
+      parameters:
+        - name: id
+          in: path
+          description: ID of organization to return
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: Update an existent organization in social network 
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Organization'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/Organization'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Organization'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Organization'          
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Organization'
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Organization not found
+        '405':
+          description: Validation exception
+      security:
+        - valuedIn_auth:
+            - write:organizations
+            - read:organizations  
+  /organizations/{id}/archive:
+    put:
+      tags:
+        - organizations
+      summary: Archive Organization
+      description: Archive an existent organization in social
+      operationId: archiveOrg
+      parameters:
+        - name: id
+          in: path
+          description: ID of organization to return
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: Archive an existent organization in social network 
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Organization'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/Organization'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Organization'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Organization'          
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Organization'
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Organization not found
+        '405':
+          description: Validation exception
+      security:
+        - valuedIn_auth:
+            - write:organizations
+            - read:organizations  
+  # /organizations/{id}/employees:
+  #   post:
+  #     tags:
+  #       - organizations
+  #     summary: List all Organization Employees
+  #     description: List all Organization Employees
+  #     operationId: listOrgEmp
+  #     parameters:
+  #       - name: id
+  #         in: path
+  #         description: ID of organization to return
+  #         required: true
+  #         schema:
+  #           type: integer
+  #           format: int64
+  #     responses:
+  #       '200':
+  #         description: Successful operation
+  #         content:
+  #           application/json:
+  #             schema:
+  #               $ref: '#/components/schemas/Employee'          
+  #           application/xml:
+  #             schema:
+  #               $ref: '#/components/schemas/Employee'
+  #       '400':
+  #         description: Invalid ID supplied
+  #       '404':
+  #         description: Employee not found
+  #       '405':
+  #         description: Validation exception
+  #     security:
+  #       - valuedIn_auth:
+  #           - write:employees
+  #           - read:employees 
+  # /organizations/{id}/valuehistory:
+  #   post:
+  #     tags:
+  #       - organizations
+  #     summary: View Organization Value history
+  #     description: This can only be done by the logged in user.
+  #     operationId: viewValueHis
+  #     parameters:
+  #       - name: id
+  #         in: path
+  #         description: ID of organization to return
+  #         required: true
+  #         schema:
+  #           type: integer
+  #           format: int64
+  #     responses:
+  #       '200':
+  #         description: Successful operation
+  #         content:
+  #           application/json:
+  #             schema:
+  #               $ref: '#/components/schemas/Organization'          
+  #           application/xml:
+  #             schema:
+  #               $ref: '#/components/schemas/Organization'
+  #       '400':
+  #         description: Invalid ID supplied
+  #       '404':
+  #         description: Organization not found
+  #       '405':
+  #         description: Validation exception
+  #     security:
+  #       - valuedIn_auth:
+  #           - write:organizations
+  #           - read:organizations
+  /organizations/{id}/jobs:
+    post:
+      tags:
+        - organizations
+      summary: View Organization Jobs
+      description: View Organization Jobs
+      operationId: viewOrgJob
+      parameters:
+        - name: id
+          in: path
+          description: ID of organization to return
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Organization'          
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Organization'
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Organization not found
+        '405':
+          description: Validation exception
+      security:
+        - valuedIn_auth:
+            - write:organizations
+            - read:organizations  
+  /organizations/requestregister:
+    post:
+      tags:
+        - organizations
+      summary: Request new Company Registration
+      description: Request new Company Registration
+      operationId: requestReg
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Organization'          
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Organization'
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Organization not found
+        '405':
+          description: Validation exception
+      security:
+        - valuedIn_auth:
+            - write:organizations
+            - read:organizations  
+  # /values:
+  #   post:
+  #     tags:
+  #       - values
+  #     summary: List all Values
+  #     description: List all existing values
+  #     operationId: listValues
+  #     responses:
+  #       '200':
+  #         description: successful operation
+  #         content:
+  #           application/json:
+  #             schema:
+  #               type: object
+  #               additionalProperties:
+  #                 type: integer
+  #                 format: int32  
+    put:
+      tags:
+        - values
+      summary: Update Value
+      description: Update an existent value in social network
+      operationId: updateValues
+      requestBody:
+        description: Update an existent value in social network 
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Value'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/Value'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Value'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Value'          
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Value'
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Organization not found
+        '405':
+          description: Validation exception
+      security:
+        - valuedIn_auth:
+            - write:values
+            - read:values  
+  /values/create:
+    post:
+      tags:
+        - values
+      summary: Create new Value for Sys Admin
+      description: This can only be done by system admin.
+      operationId: sysCreateValue
+      requestBody:
+        description: Create a new value in the social network
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Value'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/Value'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Value'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Value'          
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Value'
+        '405':
+          description: Invalid input
+      security:
+        - valuedIn_auth:
+            - write:values
+            - read:values 
+  /values/archive:
+    put:
+      tags:
+        - values
+      summary: Archive Value
+      description: This can only be done by the System Admin.
+      operationId: archValue
+      requestBody:
+        description: Archive an existent value in social network 
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Value'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/Value'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Value'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Value'          
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Value'
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Organization not found
+        '405':
+          description: Validation exception
+      security:
+        - valuedIn_auth:
+            - write:values
+            - read:values 
+  # /jobs:
+  #   post:
+  #     tags:
+  #       - jobs
+  #     summary: List all Jobs
+  #     description: List  all existing jobs
+  #     operationId: listJobs
+  #     responses:
+  #       '200':
+  #         description: successful operation
+  #         content:
+  #           application/json:
+  #             schema:
+  #               type: object
+  #               additionalProperties:
+  #                 type: integer
+  #                 format: int32 
+  # /jobs/feed:
+  #   post:
+  #     tags:
+  #       - jobs
+  #     summary: List all Feed elements of Jobs
+  #     description: This can only be done by the logged in user.
+  #     operationId: listFeedJobs
+  #     responses:
+  #       '200':
+  #         description: successful operation
+  #         content:
+  #           application/json:
+  #             schema:
+  #               type: object
+  #               additionalProperties:
+  #                 type: integer
+  #                 format: int32 
+  /jobs/{id}:
+    post:
+      tags:
+        - jobs
+      summary: Create new Job
+      description: This can only be done by HR role.
+      operationId: createJob
+      parameters:
+        - name: id
+          in: path
+          description: ID of job to return
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: Create a new organization in the social network
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Job'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/Job'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Job'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Job'          
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Job'
+        '405':
+          description: Invalid input
+      security:
+        - valuedIn_auth:
+            - write:jobs
+            - read:jobs
+    get:
+      tags:
+        - jobs
+      summary: View Job
+      description: This can only be done by the logged in user.
+      operationId: viewJob
+      parameters:
+        - name: id
+          in: path
+          description: ID of organization to return
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Organization'          
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Organization'
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Pet not found
+      security:
+        - api_key: []
+        - valuedIn_auth:
+            - write:organizations
+            - read:organizations 
+    put:
+      tags:
+        - jobs
+      summary: Update Job
+      description: This can only be done by the logged in user.
+      operationId: updateJob
+      parameters:
+        - name: id
+          in: path
+          description: ID of job to return
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: Update an existent job in social network 
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Job'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/Job'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Job'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Job'          
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Job'
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Organization not found
+        '405':
+          description: Validation exception
+      security:
+        - valuedIn_auth:
+            - write:jobs
+            - read:jobs
+  /jobs/{id}/archive:
+    put:
+      tags:
+        - jobs
+      summary: Archive Job
+      description: This can only be done by the logged in user.
+      operationId: archJob
+      parameters:
+        - name: id
+          in: path
+          description: ID of job to return
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: Archive an existent value in social network 
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Job'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/Job'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Job'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Job'          
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Job'
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Organization not found
+        '405':
+          description: Validation exception
+      security:
+        - valuedIn_auth:
+            - write:jobs
+            - read:jobs   
+  /jobs/{id}/apply:
+    post:
+      tags:
+        - jobs
+      summary: Apply to Job
+      description: This can only be done by the logged in user.
+      operationId: applyJob
+      parameters:
+        - name: id
+          in: path
+          description: ID of job to return
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Job'          
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Job'
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Organization not found
+        '405':
+          description: Validation exception
+      security:
+        - valuedIn_auth:
+            - write:jobs
+            - read:jobs  
+  /jobs/{id}/bookmark:
+    post:
+      tags:
+        - jobs
+      summary: Bookmark Job
+      description: This can only be done by the logged in user.
+      operationId: bookJob
+      parameters:
+        - name: id
+          in: path
+          description: ID of job to return
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Job'          
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Job'
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Organization not found
+        '405':
+          description: Validation exception
+      security:
+        - valuedIn_auth:
+            - write:jobs
+            - read:jobs  
+  /jobs/{id}/applicants:
+    post:
+      tags:
+        - jobs
+      summary: View applicants to Job
+      description: This can only be done by the logged in user.
+      operationId: viewAppJob
+      parameters:
+        - name: id
+          in: path
+          description: ID of job to return
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Applicant'          
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Applicant'
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Applicant not found
+        '405':
+          description: Validation exception
+      security:
+        - valuedIn_auth:
+            - write:applicants
+            - read:applicants  
+  /ws:
+    get:
+      tags:
+        - chats
+      summary: Establish Web Socket
+      description: Establish Web Socket
+      operationId: webSocket
+      responses:
+        '200':
+          description: Success  
+  /chats:
+    post:
+      tags:
+        - chats
+      summary: List all Chats
+      description: This can only be done by the logged in user.
+      operationId: listChats
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: integer
+                  format: int32 
+  /chats/{id}:
+    post:
+      tags:
+        - chats
+      summary: View Chat
+      description: This can only be done by the logged in user.
+      operationId: viewChat
+      parameters:
+        - name: id
+          in: path
+          description: ID of organization to return
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Chat'          
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Chat'
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Chat not found
+      security:
+        - api_key: []
+        - valuedIn_auth:
+            - write:chats
+            - read:chats 
+  /chats/create:
+    post:
+      tags:
+        - chats
+      summary: Create Chat
+      description: This can only be done by the logged in user.
+      operationId: createChat
+      requestBody:
+        description: Create a new chat by the user
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Chat'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/Chat'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Chat'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Chat'          
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Chat'
+        '405':
+          description: Invalid input
+      security:
+        - valuedIn_auth:
+            - write:chats
+            - read:chats 
+  /chats/message:
+    post:
+      tags:
+        - chats
+      summary: Create a Message in Chat
+      description: This can only be done by the logged in user.
+      operationId: createMsg
+      requestBody:
+        description: Create a new message by the user
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Message'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/Message'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Message'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'          
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Message'
+        '405':
+          description: Invalid input
+      security:
+        - valuedIn_auth:
+            - write:messages
+            - read:messages   
+  # /feed:
+  #   post:
+  #     tags:
+  #       - feed
+  #     summary: List all Feed elements
+  #     description: This can only be done by the logged in user.
+  #     operationId: listFeed
+  #     responses:
+  #       '200':
+  #         description: Successful operation
+  #         content:
+  #           application/json:
+  #             schema:
+  #               $ref: '#/components/schemas/Feed'          
+  #           application/xml:
+  #             schema:
+  #               $ref: '#/components/schemas/Feed'
+  #       '400':
+  #         description: Invalid ID supplied
+  #       '404':
+  #         description: Applicant not found
+  #       '405':
+  #         description: Validation exception
+  #     security:
+  #       - valuedIn_auth:
+  #           - write:feeds
+  #           - read:feeds   
+components:
+  schemas:
+    AuthRequest:
+      type: object
+      properties:
+        login:
+          type: string
+          nullable: true
+        password:
+          type: string
+          nullable: true
+        rememberMe:
+          type: boolean
+      additionalProperties: false
+    NewUser:
+      type: object
+      properties:
+        login:
+          type: string
+          nullable: true
+        role:
+          type: string
+          nullable: true
+        firstName:
+          type: string
+          nullable: true
+        lastName:
+          type: string
+          nullable: true
+        password:
+          type: string
+          nullable: true
+        email:
+          type: string
+          nullable: true
+        telephone:
+          type: string
+          nullable: true
+      additionalProperties: false
+    OrderByColumn:
+      type: object
+      properties:
+        column:
+          type: string
+          nullable: true
+        ascending:
+          type: boolean
+      additionalProperties: false
+    TokenAndRole:
+      type: object
+      properties:
+        token:
+          type: string
+          nullable: true
+        role:
+          type: string
+          nullable: true
+      additionalProperties: false
+    UpdatedUser:
+      type: object
+      properties:
+        userID:
+          type: string
+          nullable: true
+        firstName:
+          type: string
+          nullable: true
+        lastName:
+          type: string
+          nullable: true
+        role:
+          type: string
+          nullable: true
+        email:
+          type: string
+          nullable: true
+        telephone:
+          type: string
+          nullable: true
+      additionalProperties: false
+    UserPageRequest:
+      type: object
+      properties:
+        page:
+          type: integer
+          format: int32
+        size:
+          type: integer
+          format: int32
+        orderByColumns:
+          type: array
+          items:
+            "$ref": "#/components/schemas/OrderByColumn"
+          nullable: true
+        showExpired:
+          type: boolean
+      additionalProperties: false
+    UserSystemInfo:
+      type: object
+      properties:
+        login:
+          type: string
+          nullable: true
+        userID:
+          type: string
+          nullable: true
+        isExpired:
+          type: boolean
+        lastActive:
+          type: string
+          format: date-time
+          nullable: true
+        role:
+          type: string
+          nullable: true
+        firstName:
+          type: string
+          nullable: true
+        lastName:
+          type: string
+          nullable: true
+        email:
+          type: string
+          nullable: true
+        telephone:
+          type: string
+          nullable: true
+      additionalProperties: false
+    UserSystemInfoPage:
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            "$ref": "#/components/schemas/UserSystemInfo"
+          nullable: true
+        total:
+          type: integer
+          format: int32
+        pageNo:
+          type: integer
+          format: int32
+        count:
+          type: integer
+          format: int32
+          readOnly: true
+      additionalProperties: false
+    Organization:
+      required:
+        - title
+        
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        banner:
+          type: array
+          xml:
+            wrapped: true
+          items:
+            type: string
+            xml:
+              name: banner  
+        title:          
+          type: string
+          example: BarberShop
+        city:
+          type: string
+          example: Bakersfield, CA
+        values:
+          type: string
+          example: [Honesty, Communication, Extrovert, Artistic]
+        match:
+          type: integer
+          format: int64
+          example: 12
+        description:
+          type: string
+          example: Classic Barbershop for Your needs
+        owner:
+          type: string
+          example: James Kameron
+        positions:
+          type: string
+          example: Barber
+        employeeValues:
+          type: string
+          example:  [Extrovert, Honest, Forth-coming]
+      xml:
+        name: organization
+    Value:
+      required:
+        - name
+      type: object
+      properties:  
+        name:
+          type: string
+          example: Honesty 
+      xml:
+        name: value    
+    Job:
+      required:
+        - title
+        
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        avatar:
+          type: array
+          xml:
+            wrapped: true
+          items:
+            type: string
+            xml:
+              name: avatar  
+        title:
+          type: string
+          example: Barber in BarberShop
+        tags:
+          type: string
+          example: [Barber, fulltime]
+        values:
+          type: string
+          example: [Openness, Extrovert, Empathic, Social]
+        match:
+          type: integer
+          format: int64
+          example: 54
+      xml:
+        name: job
+    Chat:
+      required:
+        - contact
+      type: object
+      properties:
+        contact:
+          type: string
+          example: Michael Scott
+      xml:
+        name: chat    
+    Message:
+      required:
+        - name
+      type: object
+      properties:
+        name:
+          type: string
+          example: Jack Black
+        sentTime:
+          type: string
+          example: 2001/01/01
+        isAuthor:
+          type: boolean
+          example: True
+        messageContent:
+          type: string
+          example: Lorem Ipsum
+      xml:
+        name: message
+    Employee:
+      required:
+        - name
+      type: object
+      properties:
+        name:
+          type: string
+          example: Jack Black
+        position:
+          type: string
+          example: Finance specialist
+        organization:
+          type: string
+          example: SwedBank
+    Applicant:
+      required:
+        - name
+      type: object
+      properties:
+        name:
+          type: string
+          example: Jack Black
+        education:
+          type: string
+          example: Klaipeda University
+    ApiResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+        type:
+          type: string
+        message:
+          type: string
+      xml:
+        name: '##default'
+  securitySchemes:
+    valuedIn_auth:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: https://petstore3.swagger.io/oauth/authorize
+          scopes:
+            write:pets: modify pets in your account
+            read:pets: read your pets
+    api_key:
+      type: apiKey
+      name: api_key
+      in: header      
