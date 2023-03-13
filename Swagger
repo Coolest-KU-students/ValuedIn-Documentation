@@ -4,8 +4,11 @@ info:
   description: Software Architecture course - Restful API design by JMNTS22 student group.
   contact:
     email: jmnts22@gmail.com
-  version: 1.0.11
+  version: 1.0.0
 servers:
+  # Added by API Auto Mocking Plugin
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/iramasauskas/ValuedIn/1.0.0
   - url: https://valuedin.swagger.io/api/v3
 tags:
   - name: auth
@@ -35,14 +38,10 @@ paths:
       responses:
         '200':
           description: Success
-          content:
-            application/json:
-              schema:
-                "$ref": "#/components/schemas/TokenAndRole"
         '404':
           description: Incorrect data provided
                 
-  /auth/register:
+  /auth/registration:
     post:
       tags:
       - auth
@@ -59,32 +58,9 @@ paths:
           description: Success  
         '404':
           description: Incorrect data provided      
-          
-  /auth/sys/register:
-    post:
-      tags:
-      - auth
-      summary: Register User account
-      description: Register User account
-      operationId: registerUser
-      requestBody:
-        content:
-          application/json:
-            schema:
-              "$ref": "#/components/schemas/NewUser"
-      responses:
-        '200':
-          description: Success  
-        '403':
-          description: Unauthenticated user
-        '404':
-          description: Incorrect data provided  
-      security:
-      - valuedIn_auth:
-          - write:users  
-          - read:users   
         
-  /auth/registerUser:
+        
+  /auth/sys/registration:
     post:
       tags:
       - auth
@@ -124,7 +100,7 @@ paths:
         '404':
           description: Incorrect data provided
                 
-  /auth/resetpassword:
+  /auth/passwordreset:
     post:
       tags:
         - auth
@@ -143,7 +119,7 @@ paths:
           - write:users  
           - read:users
           
-  /auth/changepassword:
+  /auth/passwordchange:
     post:
       tags:
         - auth
@@ -165,17 +141,12 @@ paths:
 # User management
           
   /users:
-    post:
+    get:
       tags:
       - users
       summary: List all Users
       description: This can only be done by the logged in user.
       operationId: listUsers
-      requestBody:
-        content:
-          application/json:
-            schema:
-              "$ref": "#/components/schemas/UserPageRequest"
       responses:
         '200':
           description: Success
@@ -192,7 +163,7 @@ paths:
           - read:users  
                 
   /users/feed:
-    post:
+    get:
       tags:
         - users
       summary: List all Feed elements of Users
@@ -269,7 +240,7 @@ paths:
             - write:users
             - read:users  
          
-  /users/{id}/uploadcv:
+  /users/{id}/cv:
     post:
       tags:
         - users
@@ -341,9 +312,7 @@ paths:
         - valuedIn_auth:
             - write:users
             - read:users  
-
-  /users/sys/{id}/expire:
-    put:
+    delete:
       tags:
         - users
       summary: Expire User
@@ -371,19 +340,12 @@ paths:
 # Organizations management
           
   /organizations:
-    post:
+    get:
       tags:
         - organizations
       summary: List all Organizations
       description: List all Organizations
       operationId: listOrg
-      requestBody:
-        description: Provide required page number and filter
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PaginatedDataRequest'
-        required: true
       responses:
         '200':
           description: successful operation
@@ -398,37 +360,7 @@ paths:
           description: Incorrect data provided
       security:
         - api_key: []  
-        
-  /organizations/feed:
-    post:
-      tags:
-        - organizations
-      summary: List all Feed elements of Organizations
-      description: List all Feed elements of Organizations
-      operationId: listFeedOrg
-      requestBody:
-        description: Provide required page number and filter
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PaginatedDataRequest'
-        required: true
-      responses:
-        '200':
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties:
-                  type: integer
-                  format: int32
-        '404':
-          description: Incorrect data provided
-      security:
-        - api_key: []  
-  
-  /organizations/create:
+    
     post:
       tags:
         - organizations
@@ -456,7 +388,30 @@ paths:
       security:
         - valuedIn_auth:
             - write:organizations
-            - read:organizations 
+            - read:organizations     
+        
+  /organizations/feed:
+    get:
+      tags:
+        - organizations
+      summary: List all Feed elements of Organizations
+      description: List all Feed elements of Organizations
+      operationId: listFeedOrg
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: integer
+                  format: int32
+        '404':
+          description: Incorrect data provided
+      security:
+        - api_key: []  
+  
             
   /organizations/{id}:
     get:
@@ -524,9 +479,7 @@ paths:
         - valuedIn_auth:
             - write:organizations
             - read:organizations  
-            
-  /organizations/{id}/archive:
-    put:
+    delete:
       tags:
         - organizations
       summary: Archive Organization
@@ -540,13 +493,6 @@ paths:
           schema:
             type: integer
             format: int64
-      requestBody:
-        description: Archive an existent organization in social network 
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Organization'
-        required: true
       responses:
         '200':
           description: Successful operation
@@ -670,7 +616,7 @@ paths:
             - read:organizations
             - read:jobs
             
-  /organizations/requestregister:
+  /organizations/request:
     post:
       tags:
         - organizations
@@ -696,19 +642,12 @@ paths:
 # Value management
 
   /values:
-    post:
+    get:
       tags:
         - values
       summary: List all Values
       description: List all existing values
       operationId: listValues
-      requestBody:
-        description: Provide required page number and filter
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PaginatedDataRequest'
-        required: true
       responses:
         '200':
           description: successful operation
@@ -754,8 +693,6 @@ paths:
         - valuedIn_auth:
             - write:values
             - read:values  
-
-  /values/create:
     post:
       tags:
         - values
@@ -785,26 +722,12 @@ paths:
             - write:values
             - read:values 
             
-  /values/archive:
-    put:
+    delete:
       tags:
         - values
       summary: Archive Value
       description: This can only be done by the System Admin.
       operationId: archValue
-      requestBody:
-        description: Archive an existent value in social network 
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Value'
-          application/xml:
-            schema:
-              $ref: '#/components/schemas/Value'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/Value'
-        required: true
       responses:
         '200':
           description: Successful operation
@@ -829,19 +752,12 @@ paths:
 # Job management
 
   /jobs:
-    post:
+    get:
       tags:
         - jobs
       summary: List all Jobs
       description: List all existing jobs
       operationId: listJobs
-      requestBody:
-        description: Provide required page number and filter
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PaginatedDataRequest'
-        required: true
       responses:
         '200':
           description: Successful operation
@@ -861,19 +777,12 @@ paths:
           - read:jobs
 
   /jobs/feed:
-    post:
+    get:
       tags:
         - jobs
       summary: List all Feed elements of Jobs
       description: This can only be done by the logged in user.
       operationId: listFeedJobs
-      requestBody:
-        description: Provide required page number and filter
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PaginatedDataRequest'
-        required: true
       responses:
         '200':
           description: Successful operation
@@ -995,8 +904,7 @@ paths:
             - write:jobs
             - read:jobs
 
-  /jobs/{id}/archive:
-    put:
+    delete:
       tags:
         - jobs
       summary: Archive Job
@@ -1010,13 +918,6 @@ paths:
           schema:
             type: integer
             format: int64
-      requestBody:
-        description: Archive an existent value in social network 
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Job'
-        required: true
       responses:
         '200':
           description: Successful operation
@@ -1033,7 +934,7 @@ paths:
             - write:jobs
             - read:jobs   
 
-  /jobs/{id}/apply:
+  /jobs/{id}/application:
     post:
       tags:
         - jobs
@@ -1096,7 +997,7 @@ paths:
             - read:jobs  
 
   /jobs/{id}/applicants:
-    post:
+    get:
       tags:
         - jobs
       summary: View applicants to Job
@@ -1141,19 +1042,12 @@ paths:
           description: Unauthenticated user
 
   /chats:
-    post:
+    get:
       tags:
         - chats
       summary: List all Chats
       description: This can only be done by the logged in user.
       operationId: listChats
-      requestBody:
-        description: Provide required page number and filter
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PaginatedDataRequest'
-        required: true
       responses:
         '200':
           description: Successful operation
@@ -1168,39 +1062,6 @@ paths:
           description: Unauthenticated user
         '404':
           description: Incorrect data provided
-
-  /chats/{id}:
-    post:
-      tags:
-        - chats
-      summary: View Chat
-      description: This can only be done by the logged in user.
-      operationId: viewChat
-      parameters:
-        - name: id
-          in: path
-          description: ID of organization to return
-          required: true
-          schema:
-            type: integer
-            format: int64
-      responses:
-        '200':
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Chat'          
-        '403':
-          description: Unauthenticated user
-        '404':
-          description: Chat not found
-      security:
-        - valuedIn_auth:
-            - write:chats
-            - read:chats 
-
-  /chats/create:
     post:
       tags:
         - chats
@@ -1225,6 +1086,37 @@ paths:
           description: Unauthenticated user
         '404':
           description: Incorrect data provided
+      security:
+        - valuedIn_auth:
+            - write:chats
+            - read:chats       
+
+  /chats/{id}:
+    get:
+      tags:
+        - chats
+      summary: View Chat
+      description: This can only be done by the logged in user.
+      operationId: viewChat
+      parameters:
+        - name: id
+          in: path
+          description: ID of organization to return
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Chat'          
+        '403':
+          description: Unauthenticated user
+        '404':
+          description: Chat not found
       security:
         - valuedIn_auth:
             - write:chats
@@ -1263,19 +1155,12 @@ paths:
 # Feed management
 
   /feed:
-    post:
+    get:
       tags:
         - feed
       summary: List all Feed elements
       description: This can only be done by the logged in user.
       operationId: listFeed
-      requestBody:
-        description: Provide required page number and filter
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PaginatedDataRequest'
-        required: true
       responses:
         '200':
           description: Successful operation
