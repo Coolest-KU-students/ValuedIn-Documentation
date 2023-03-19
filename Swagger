@@ -41,7 +41,6 @@ paths:
         '404':
           description: Incorrect data provided
                 
-  /auth/registration:
     post:
       tags:
       - auth
@@ -52,15 +51,33 @@ paths:
         content:
           application/json:
             schema:
-              "$ref": "#/components/schemas/NewUser"
+              $ref: '#/components/schemas/NewUser'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/NewUser'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/NewUser'
+        description: Created user object
+        required: true
       responses:
         '200':
-          description: Success  
+          description: Success 
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NewUser'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/NewUser'
+            application/x-www-form-urlencoded:
+              schema:
+                $ref: '#/components/schemas/NewUser'  
         '404':
           description: Incorrect data provided      
         
         
-  /auth/sys/registration:
+  /auth/sys:
     post:
       tags:
       - auth
@@ -71,34 +88,79 @@ paths:
         content:
           application/json:
             schema:
-              "$ref": "#/components/schemas/NewUser"
+              $ref: '#/components/schemas/NewUser'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/NewUser'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/NewUser'
+        description: Created user object
+        required: true
       responses:
         '200':
-          description: Success
+          description: Success 
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NewUser'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/NewUser'
+            application/x-www-form-urlencoded:
+              schema:
+                $ref: '#/components/schemas/NewUser'  
         '404':
-          description: Incorrect data provided
+          description: Incorrect data provided 
           
   /auth/login:
-    post:
+    get:
       tags:
       - auth
       summary: Login by user
       description: Login by user
       operationId: logUser
-      requestBody:
-        content:
-          application/json:
-            schema:
-              "$ref": "#/components/schemas/AuthRequest"
+      parameters:
+        - name: login
+          in: query
+          description: The user name for login
+          required: true
+          schema:
+            type: string
+        - name: password
+          in: query
+          description: The password for login in clear text
+          required: true
+          schema:
+            type: string
+        - name: rememberMe
+          in: query
+          required: false
+          schema:
+            type: boolean
       responses:
         '200':
-          description: Success
+          description: successful operation
+          headers:
+            X-Rate-Limit:
+              description: calls per hour allowed by the user
+              schema:
+                type: integer
+                format: int32
+            X-Expires-After:
+              description: date in UTC when token expires
+              schema:
+                type: string
+                format: date-time
           content:
+            application/xml:
+              schema:
+                type: string
             application/json:
               schema:
-                "$ref": "#/components/schemas/TokenAndRole"
-        '404':
-          description: Incorrect data provided
+                type: string
+        '400':
+          description: Invalid username/password supplied
                 
   /auth/passwordreset:
     post:
@@ -110,10 +172,6 @@ paths:
       responses:
         '200':
           description: Success  
-        '403':
-          description: Unauthenticated user
-        '404':
-          description: Incorrect data provided
       security:
       - valuedIn_auth:
           - write:users  
@@ -125,12 +183,18 @@ paths:
         - auth
       summary: Change password
       description: This can only be done by the logged in user.
-      operationId: changePass       
+      operationId: changePass 
+      parameters:
+        - name: email
+          in: query
+          description: Email address for password change
+          required: true
+          schema:
+            type: string
+        
       responses:
         '200':
           description: Success
-        '403':
-          description: Unauthenticated user
         '404':
           description: Incorrect data provided
       security:
@@ -145,7 +209,7 @@ paths:
       tags:
       - users
       summary: List all Users
-      description: This can only be done by the logged in user.
+      description: This can only be done by the logged system admin.
       operationId: listUsers
       responses:
         '200':
@@ -153,11 +217,15 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/UserSystemInfoPage"
+                $ref: '#/components/schemas/UserSystemInfoPage'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/UserSystemInfoPage'
+            application/x-www-form-urlencoded:
+              schema:
+                $ref: '#/components/schemas/UserSystemInfoPage'  
         '403':
           description: Unauthenticated user
-        '404':
-          description: Incorrect data provided
       security:
       - valuedIn_auth:
           - read:users  
@@ -171,25 +239,29 @@ paths:
       operationId: listFeedUsers
       responses:
         '200':
-          description: successful operation
+          description: Success
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties:
-                  type: integer
-                  format: int32
-        '404':
-          description: Incorrect data provided
+                $ref: '#/components/schemas/UserFeedInfoPage'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/UserFeedInfoPage'
+            application/x-www-form-urlencoded:
+              schema:
+                $ref: '#/components/schemas/UserFeedInfoPage'  
+        '403':
+          description: Unauthenticated user
       security:
-        - api_key: []
+      - valuedIn_auth:
+          - read:users  
                
   /users/{id}:
     get:
       tags:
       - users
       summary: View User
-      description: This can only be done by the logged in user.
+      description: This can only be done by system admin.
       operationId: viewUser
       parameters:
       - name: id
@@ -204,13 +276,16 @@ paths:
             application/json:
               schema:
                 "$ref": "#/components/schemas/UserSystemInfo"
-        '403':
-          description: Unauthenticated user
+        '400':
+          description: Invalid ID supplied
         '404':
-          description: Incorrect data provided
+          description: User not found
       security:
+        - api_key: []
         - valuedIn_auth:
-            - read:users  
+            - 'write:users'
+            - 'read:users'          
+ 
     put:
       tags:
       - users
@@ -228,17 +303,19 @@ paths:
           application/json:
             schema:
               "$ref": "#/components/schemas/UpdatedUser"
+        required: true        
       responses:
         '200':
           description: Success
-        '403':
-          description: Unauthenticated user
+        '400':
+          description: Invalid ID supplied
         '404':
-          description: Incorrect data provided
+          description: User not found
       security:
+        - api_key: []
         - valuedIn_auth:
-            - write:users
-            - read:users  
+            - 'write:users'
+            - 'read:users'  
          
   /users/{id}/cv:
     post:
@@ -274,10 +351,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiResponse'
-        '403':
-          description: Unauthenticated user
-        '404':
-          description: Incorrect data provided
       security:
         - valuedIn_auth:
             - write:users
@@ -288,7 +361,7 @@ paths:
       tags:
       - users
       summary: Update User (for sys admin)
-      description: This can only be done by the logged in user.
+      description: This can only be done by the system admin.
       operationId: updateUserSys
       parameters:
       - name: id
@@ -301,17 +374,19 @@ paths:
           application/json:
             schema:
               "$ref": "#/components/schemas/UpdatedUser"
+        required: true      
       responses:
         '200':
           description: Success
-        '403':
-          description: Unauthenticated user
+        '400':
+          description: Invalid ID supplied
         '404':
-          description: Incorrect data provided
+          description: User not found
       security:
+        - api_key: []
         - valuedIn_auth:
-            - write:users
-            - read:users  
+            - 'write:users'
+            - 'read:users'   
     delete:
       tags:
         - users
@@ -326,16 +401,10 @@ paths:
         schema:
           type: string
       responses:
-        '200':
-          description: Success
-        '403':
-          description: Unauthenticated user
+        '400':
+          description: Invalid ID supplied
         '404':
-          description: Incorrect data provided
-      security:
-        - valuedIn_auth:
-            - write:users
-            - read:users  
+          description: User not found 
       
 # Organizations management
           
@@ -348,18 +417,22 @@ paths:
       operationId: listOrg
       responses:
         '200':
-          description: successful operation
+          description: Success
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties:
-                  type: integer
-                  format: int32
-        '404':
-          description: Incorrect data provided
+                $ref: '#/components/schemas/OrgSystemInfoPage'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/OrgSystemInfoPage'
+            application/x-www-form-urlencoded:
+              schema:
+                $ref: '#/components/schemas/OrgSystemInfoPage'  
+        '403':
+          description: Unauthenticated user
       security:
-        - api_key: []  
+      - valuedIn_auth:
+          - read:organizations   
     
     post:
       tags:
@@ -372,7 +445,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Organization'
+              $ref: '#/components/schemas/NewOrganization'
         required: true
       responses:
         '200':
@@ -380,15 +453,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Organization'
-        '403':
-          description: Unauthenticated user
+                $ref: '#/components/schemas/NewOrganization'
         '404':
-          description: Incorrect data provided
-      security:
-        - valuedIn_auth:
-            - write:organizations
-            - read:organizations     
+          description: Incorrect data provided    
         
   /organizations/feed:
     get:
@@ -399,18 +466,22 @@ paths:
       operationId: listFeedOrg
       responses:
         '200':
-          description: successful operation
+          description: Success
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties:
-                  type: integer
-                  format: int32
-        '404':
-          description: Incorrect data provided
+                $ref: '#/components/schemas/OrgFeedInfoPage'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/OrgFeedInfoPage'
+            application/x-www-form-urlencoded:
+              schema:
+                $ref: '#/components/schemas/OrgFeedInfoPage'  
+        '403':
+          description: Unauthenticated user
       security:
-        - api_key: []  
+      - valuedIn_auth:
+          - read:users
   
             
   /organizations/{id}:
@@ -434,15 +505,16 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Organization'
-        '403':
-          description: Unauthenticated user
+                $ref: '#/components/schemas/OrgSystemInfo'
+        '400':
+          description: Invalid ID supplied
         '404':
-          description: Incorrect data provided
+          description: Organization not found
       security:
+        - api_key: []
         - valuedIn_auth:
-            - write:organizations
-            - read:organizations 
+            - 'write:organizations'
+            - 'read:organizations'
     put:
       tags:
         - organizations
@@ -462,7 +534,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Organization'
+              $ref: '#/components/schemas/OrgSystemInfo'
         required: true
       responses:
         '200':
@@ -470,15 +542,16 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Organization'          
-        '403':
-          description: Unauthenticated user
+                $ref: '#/components/schemas/OrgSystemInfo'          
+        '400':
+          description: Invalid ID supplied
         '404':
-          description: Incorrect data provided
+          description: Organization not found
       security:
+        - api_key: []
         - valuedIn_auth:
-            - write:organizations
-            - read:organizations  
+            - 'write:organizations'
+            - 'read:organizations'  
     delete:
       tags:
         - organizations
@@ -488,29 +561,19 @@ paths:
       parameters:
         - name: id
           in: path
-          description: ID of organization to return
+          description: ID of organization to archive
           required: true
           schema:
             type: integer
             format: int64
       responses:
-        '200':
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Organization'          
-        '403':
-          description: Unauthenticated user
+        '400':
+          description: Invalid ID supplied
         '404':
-          description: Incorrect data provided
-      security:
-        - valuedIn_auth:
-            - write:organizations
-            - read:organizations  
+          description: Organization not found 
 
   /organizations/{id}/employees:
-    post:
+    get:
       tags:
         - organizations
       summary: List all Organization Employees
@@ -519,32 +582,28 @@ paths:
       parameters:
         - name: id
           in: path
-          description: ID of organization to return
+          description: ID of organization to return employees
           required: true
           schema:
             type: integer
             format: int64
-      requestBody:
-        description: Provide required page number and filter
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PaginatedDataRequest'
-        required: true
       responses:
         '200':
           description: Successful operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Employee'          
-        '403':
-          description: Unauthenticated user
+                $ref: '#/components/schemas/EmployeeInfoPage'          
+        '400':
+          description: Invalid ID supplied
         '404':
-          description: Incorrect data provided
+          description: Organization not found
       security:
+        - api_key: []
         - valuedIn_auth:
-            - read:employees 
+            - write:organizations
+            - read:organizations
+            - read:employees
     
   /organizations/{id}/valuehistory:
     post:
@@ -574,7 +633,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Organization'
+                $ref: '#/components/schemas/OrgSystemInfo'
         '403':
           description: Unauthenticated user
         '404':
@@ -585,7 +644,7 @@ paths:
             - read:organizations
 
   /organizations/{id}/jobs:
-    post:
+    get:
       tags:
         - organizations
       summary: View Organization Jobs
@@ -594,7 +653,7 @@ paths:
       parameters:
         - name: id
           in: path
-          description: ID of organization to return
+          description: ID of organization to return open job positions
           required: true
           schema:
             type: integer
@@ -605,11 +664,11 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Organization'          
-        '403':
-          description: Unauthenticated user
+                $ref: '#/components/schemas/JobInfoPage'        
+        '400':
+          description: Invalid ID supplied
         '404':
-          description: Incorrect data provided
+          description: Organization not found
       security:
         - valuedIn_auth:
             - write:organizations
@@ -626,14 +685,6 @@ paths:
       responses:
         '200':
           description: Successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Organization'
-        '403':
-          description: Unauthenticated user
-        '404':
-          description: Incorrect data provided
       security:
         - valuedIn_auth:
             - write:organizations
@@ -654,14 +705,9 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties:
-                  type: integer
-                  format: int32  
+                $ref: '#/components/schemas/ValueInfoPage'
         '403':
           description: Unauthenticated user
-        '404':
-          description: Incorrect data provided
       security:
         - valuedIn_auth:
             - read:values  
@@ -671,6 +717,14 @@ paths:
       summary: Update Value
       description: Update an existent value in social network
       operationId: updateValues
+      parameters:
+        - name: name
+          in: query
+          description: Name to filter by
+          required: false
+          explode: true
+          schema:
+              type: string
       requestBody:
         description: Update an existent value in social network 
         content:
@@ -686,9 +740,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/Value'          
         '400':
-          description: Invalid ID supplied
+          description: Invalid name supplied
         '404':
-          description: Organization not found
+          description: Value not found
       security:
         - valuedIn_auth:
             - write:values
@@ -728,26 +782,19 @@ paths:
       summary: Archive Value
       description: This can only be done by the System Admin.
       operationId: archValue
+      parameters:
+        - name: name
+          in: query
+          description: Name to filter by
+          required: true
+          explode: true
+          schema:
+              type: string
       responses:
-        '200':
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Value'          
-            application/xml:
-              schema:
-                $ref: '#/components/schemas/Value'
         '400':
-          description: Invalid ID supplied
+          description: Invalid name supplied
         '404':
-          description: Organization not found
-        '405':
-          description: Validation exception
-      security:
-        - valuedIn_auth:
-            - write:values
-            - read:values 
+          description: Value not found
             
 # Job management
 
@@ -760,21 +807,22 @@ paths:
       operationId: listJobs
       responses:
         '200':
-          description: Successful operation
+          description: Success
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties:
-                  type: integer
-                  format: int32 
+                $ref: '#/components/schemas/JobSystemInfoPage'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/JobSystemInfoPage'
+            application/x-www-form-urlencoded:
+              schema:
+                $ref: '#/components/schemas/JobSystemInfoPage'  
         '403':
           description: Unauthenticated user
-        '404':
-          description: Incorrect data provided
       security:
       - valuedIn_auth:
-          - read:jobs
+          - read:jobs 
 
   /jobs/feed:
     get:
@@ -785,21 +833,22 @@ paths:
       operationId: listFeedJobs
       responses:
         '200':
-          description: Successful operation
+          description: Success
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties:
-                  type: integer
-                  format: int32 
+                $ref: '#/components/schemas/JobInfoPage'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/JobInfoPage'
+            application/x-www-form-urlencoded:
+              schema:
+                $ref: '#/components/schemas/JobInfoPage'  
         '403':
           description: Unauthenticated user
-        '404':
-          description: Incorrect data provided
       security:
       - valuedIn_auth:
-          - read:jobs
+          - read:jobs 
   
   /jobs/{id}:
     post:
@@ -830,10 +879,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Job'          
-        '403':
-          description: Unauthenticated user
-        '404':
-          description: Job not found
+        '400':
+          description: Invalid ID supplied
       security:
         - valuedIn_auth:
             - write:jobs
@@ -859,19 +906,20 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Job'
-        '403':
-          description: Unauthenticated user
+        '400':
+          description: Invalid ID supplied
         '404':
           description: Job not found
       security:
         - api_key: []
         - valuedIn_auth:
-            - read:jobs 
+            - 'write:jobs'
+            - 'read:jobs'
     put:
       tags:
         - jobs
       summary: Update Job
-      description: This can only be done by the logged in user.
+      description: This can only be done by HR role.
       operationId: updateJob
       parameters:
         - name: id
@@ -895,8 +943,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Job'
-        '403':
-          description: Unauthenticated user
+        '400':
+          description: Invalid ID supplied
         '404':
           description: Job not found
       security:
@@ -913,26 +961,16 @@ paths:
       parameters:
         - name: id
           in: path
-          description: ID of job to return
+          description: ID of job to archive
           required: true
           schema:
             type: integer
             format: int64
       responses:
-        '200':
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Job'          
-        '403':
-          description: Unauthenticated user
+        '400':
+          description: Invalid ID supplied
         '404':
-          description: Job not found
-      security:
-        - valuedIn_auth:
-            - write:jobs
-            - read:jobs   
+          description: Organization not found  
 
   /jobs/{id}/application:
     post:
@@ -944,7 +982,7 @@ paths:
       parameters:
         - name: id
           in: path
-          description: ID of job to return
+          description: ID of job to to apply to
           required: true
           schema:
             type: integer
@@ -956,8 +994,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Job'          
-        '403':
-          description: Unauthenticated user
+        '400':
+          description: Invalid ID supplied
         '404':
           description: Job not found
       security:
@@ -987,8 +1025,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Job'
-        '403':
-          description: Unauthenticated user
+        '400':
+          description: Invalid ID supplied
         '404':
           description: Job not found
       security:
@@ -1017,9 +1055,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Applicant'
-        '403':
-          description: Unauthenticated user
+                $ref: '#/components/schemas/AppInfoPage'
+        '400':
+          description: Invalid ID supplied
         '404':
           description: Applicant not found
       security:
@@ -1050,38 +1088,45 @@ paths:
       operationId: listChats
       responses:
         '200':
-          description: Successful operation
+          description: Success
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties:
-                  type: integer
-                  format: int32 
+                $ref: '#/components/schemas/ChatInfoPage'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/ChatInfoPage'
+            application/x-www-form-urlencoded:
+              schema:
+                $ref: '#/components/schemas/ChatInfoPage'  
         '403':
           description: Unauthenticated user
-        '404':
-          description: Incorrect data provided
+      security:
+      - valuedIn_auth:
+          - read:jobs 
     post:
       tags:
         - chats
       summary: Create Chat
       description: This can only be done by the logged in user.
       operationId: createChat
-      requestBody:
-        description: Provide chat content
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Chat'
-        required: true
+      parameters:
+        - name: firstName
+          in: query
+          description: First name of user to chat with
+          required: true
+          schema:
+            type: string
+        - name: lastName
+          in: query
+          description: Last name of user to chat with
+          required: true
+          schema:
+            type: string
+      
       responses:
         '200':
           description: Successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Chat'          
         '403':
           description: Unauthenticated user
         '404':
@@ -1101,7 +1146,7 @@ paths:
       parameters:
         - name: id
           in: path
-          description: ID of organization to return
+          description: ID of chat to return
           required: true
           schema:
             type: integer
@@ -1163,33 +1208,25 @@ paths:
       operationId: listFeed
       responses:
         '200':
-          description: Successful operation
+          description: Success
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Feed'          
+                $ref: '#/components/schemas/FeedInfoPage'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/FeedInfoPage'
+            application/x-www-form-urlencoded:
+              schema:
+                $ref: '#/components/schemas/FeedInfoPage'
         '403':
           description: Unauthenticated user
-        '404':
-          description: Incorrect data provided
       security:
         - valuedIn_auth:
             - read:feeds  
 
 components:
   schemas:
-    AuthRequest:
-      type: object
-      properties:
-        login:
-          type: string
-          nullable: true
-        password:
-          type: string
-          nullable: true
-        rememberMe:
-          type: boolean
-      additionalProperties: false
     NewUser:
       type: object
       properties:
@@ -1215,25 +1252,6 @@ components:
           type: string
           nullable: true
       additionalProperties: false
-    OrderByColumn:
-      type: object
-      properties:
-        column:
-          type: string
-          nullable: true
-        ascending:
-          type: boolean
-      additionalProperties: false
-    TokenAndRole:
-      type: object
-      properties:
-        token:
-          type: string
-          nullable: true
-        role:
-          type: string
-          nullable: true
-      additionalProperties: false
     UpdatedUser:
       type: object
       properties:
@@ -1255,23 +1273,6 @@ components:
         telephone:
           type: string
           nullable: true
-      additionalProperties: false
-    UserPageRequest:
-      type: object
-      properties:
-        page:
-          type: integer
-          format: int32
-        size:
-          type: integer
-          format: int32
-        orderByColumns:
-          type: array
-          items:
-            "$ref": "#/components/schemas/OrderByColumn"
-          nullable: true
-        showExpired:
-          type: boolean
       additionalProperties: false
     UserSystemInfo:
       type: object
@@ -1303,7 +1304,27 @@ components:
         telephone:
           type: string
           nullable: true
-      additionalProperties: false
+      additionalProperties: false  
+    UserFeedInfo:
+      type: object
+      properties:
+        userFirstName:
+          type: string
+          nullable: true
+        userLastName:
+          type: string
+          nullable: true
+        userPosition:
+          type: string
+          nullable: true
+        userMatch:
+          type: number
+          nullable: true
+        userValues:
+          type: array
+          items:
+            type: string  
+      additionalProperties: false  
     UserSystemInfoPage:
       type: object
       properties:
@@ -1322,8 +1343,83 @@ components:
           type: integer
           format: int32
           readOnly: true
-      additionalProperties: false
-    Organization:
+      additionalProperties: false  
+    UserFeedInfoPage:
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            "$ref": "#/components/schemas/UserFeedInfo"
+          nullable: true
+        total:
+          type: integer
+          format: int32
+        pageNo:
+          type: integer
+          format: int32
+        count:
+          type: integer
+          format: int32
+          readOnly: true
+      additionalProperties: false  
+    NewOrganization:
+      type: object
+      properties:
+        login:
+          type: string
+          nullable: true
+        title:
+          type: string
+        password:
+          type: string
+          nullable: true
+        email:
+          type: string
+          nullable: true
+        telephone:
+          type: string
+          nullable: true
+      additionalProperties: false  
+    OrgSystemInfoPage:
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            "$ref": "#/components/schemas/OrgSystemInfo"
+          nullable: true
+        total:
+          type: integer
+          format: int32
+        pageNo:
+          type: integer
+          format: int32
+        count:
+          type: integer
+          format: int32
+          readOnly: true
+      additionalProperties: false   
+    OrgFeedInfoPage:
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            "$ref": "#/components/schemas/OrgFeedInfo"
+          nullable: true
+        total:
+          type: integer
+          format: int32
+        pageNo:
+          type: integer
+          format: int32
+        count:
+          type: integer
+          format: int32
+          readOnly: true
+      additionalProperties: false  
+    OrgSystemInfo:
       required:
         - title
       type: object
@@ -1347,8 +1443,10 @@ components:
           type: string
           example: Bakersfield, CA
         values:
-          type: string
-          example: [Honesty, Communication, Extrovert, Artistic]
+          type: array
+          items:
+           type: string
+           example: Honesty, Communication, Extrovert, Artistic
         match:
           type: integer
           format: int64
@@ -1363,21 +1461,86 @@ components:
           type: string
           example: Barber
         employeeValues:
-          type: string
-          example: [Extrovert, Honest, Forth-coming]
+          type: array
+          items:
+           type: string
+           example: Extrovert, Honest, Forth-coming
       xml:
-        name: organization
-    Value:
+        name: organization  
+    OrgFeedInfo:
+      required:
+        - title
+      type: object
+      properties:
+        organizationBanner:
+          type: array
+          xml:
+            wrapped: true
+          items:
+            type: string
+            xml:
+              name: banner  
+        organizationTitle:          
+          type: string
+          example: BarberShop
+        organizationDescription:
+          type: string
+          example: Classic Barbershop for Your needs
+      xml:
+        name: organization  
+    EmployeeInfoPage:
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            "$ref": "#/components/schemas/Employee"
+          nullable: true
+        total:
+          type: integer
+          format: int32
+        pageNo:
+          type: integer
+          format: int32
+        count:
+          type: integer
+          format: int32
+          readOnly: true
+      additionalProperties: false  
+    Employee:
       required:
         - name
       type: object
-      properties:  
+      properties:
         name:
           type: string
-          example: Honesty 
-      xml:
-        name: value    
-    Job:
+          example: Jack Black
+        position:
+          type: string
+          example: Finance specialist
+        organization:
+          type: string
+          example: SwedBank  
+    JobSystemInfoPage:
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            "$ref": "#/components/schemas/JobSysInfo"
+          nullable: true
+        total:
+          type: integer
+          format: int32
+        pageNo:
+          type: integer
+          format: int32
+        count:
+          type: integer
+          format: int32
+          readOnly: true
+      additionalProperties: false 
+    JobSysInfo:
       required:
         - title
       type: object
@@ -1397,73 +1560,94 @@ components:
         title:
           type: string
           example: Barber in BarberShop
-        tags:
+        position:
           type: string
-          example: [Barber, fulltime]
+          example: Barber
+        location:
+          type: string
+          example: Bakersfield, CA
+        job description:
+          type: string
+          example: BarberShop provides a wide array of men's haircuts and styles for a diverse clientele.
         values:
           type: string
-          example: [Openness, Extrovert, Empathic, Social]
+          example: Openness, Extrovert, Empathic, Social
         match:
           type: integer
           format: int64
           example: 54
       xml:
         name: job
-    Chat:
+    Job:
       required:
-        - contact
+        - title
       type: object
       properties:
-        contact:
+        jobAvatar:
+          type: array
+          xml:
+            wrapped: true
+          items:
+            type: string
+            xml:
+              name: avatar  
+        jobTitle:
           type: string
-          example: Michael Scott
+          example: Barber in BarberShop
+        jobTags:
+          type: array
+          items:
+           type: string
+           example: Barber, fulltime
+        jobValues:
+          type: array
+          items:
+           type: string
+          example: Openness, Extrovert, Empathic, Social
+        jobMatch:
+          type: integer
+          format: int64
+          example: 54
       xml:
-        name: chat    
-    Message:
-      required:
-        - name
+        name: job  
+    JobInfoPage:
       type: object
       properties:
-        name:
-          type: string
-          example: Jack Black
-        sentTime:
-          type: string
-          example: 2001/01/01
-        isAuthor:
-          type: boolean
-          example: True
-        messageContent:
-          type: string
-          example: Lorem Ipsum
-      xml:
-        name: message
-    Employee:
-      required:
-        - name
+        results:
+          type: array
+          items:
+            "$ref": "#/components/schemas/Job"
+          nullable: true
+        total:
+          type: integer
+          format: int32
+        pageNo:
+          type: integer
+          format: int32
+        count:
+          type: integer
+          format: int32
+          readOnly: true
+      additionalProperties: false 
+    AppInfoPage:
       type: object
       properties:
-        name:
-          type: string
-          example: Jack Black
-        position:
-          type: string
-          example: Finance specialist
-        organization:
-          type: string
-          example: SwedBank
-    PaginatedDataRequest:
-      required:
-          - page
-          - filter
-      type: object
-      properties:
-        page:          
-          type: object
-          example: 3
-        filter:
-          type: string
-          example: "ColumnName = 'Example Filter Text'"
+        results:
+          type: array
+          items:
+            "$ref": "#/components/schemas/Applicant"
+          nullable: true
+        total:
+          type: integer
+          format: int32
+        pageNo:
+          type: integer
+          format: int32
+        count:
+          type: integer
+          format: int32
+          readOnly: true
+      additionalProperties: false  
     Applicant:
       required:
         - name
@@ -1475,6 +1659,146 @@ components:
         education:
           type: string
           example: Klaipeda University
+    ValueInfoPage:
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            "$ref": "#/components/schemas/ValuesInfo"
+          nullable: true
+        total:
+          type: integer
+          format: int32
+        pageNo:
+          type: integer
+          format: int32
+        count:
+          type: integer
+          format: int32
+          readOnly: true
+      additionalProperties: false     
+    ValuesInfo:
+       type: string
+    Value:
+      type: object
+      properties:
+        name:
+          type: string
+          nullable: true
+    Chat:
+      type: object
+      properties:
+        firstName:
+          type: string
+          nullable: true
+        lastName:
+          type: string
+          nullable: true
+        lastMessage:
+          type: string
+          nullable: true
+        lastMessageDate:
+          type: string
+          format: date
+      xml:
+        name: chat    
+    Chats:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        firstName:
+          type: string
+          nullable: true
+        lastName:
+          type: string
+          nullable: true
+        lastMessage:
+          type: string
+          nullable: true
+        lastMessageDate:
+          type: string
+          format: date
+      xml:
+        name: chat
+    ChatInfoPage:
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            "$ref": "#/components/schemas/Chats"
+          nullable: true
+        total:
+          type: integer
+          format: int32
+        pageNo:
+          type: integer
+          format: int32
+        count:
+          type: integer
+          format: int32
+          readOnly: true
+      additionalProperties: false     
+    Message:
+      required:
+        - name
+      type: object
+      properties:
+        name:
+          type: string
+          example: Jack Black
+        isAuthor:
+          type: boolean
+          example: True
+        messageContent:
+          type: string
+          example: Lorem Ipsum
+      xml:
+        name: message
+    FeedInfoPage:
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            "$ref": "#/components/schemas/Feed"
+          nullable: true
+        total:
+          type: integer
+          format: int32
+        pageNo:
+          type: integer
+          format: int32
+        count:
+          type: integer
+          format: int32
+          readOnly: true
+      additionalProperties: false     
+    Feed:
+     type: object
+     properties:
+        results:
+          allOf:
+           - $ref: "#/components/schemas/UserFeedInfo"
+           - $ref: "#/components/schemas/Job"
+           - $ref: "#/components/schemas/OrgFeedInfo"
+          nullable: true
+    PaginatedDataRequest:
+      required:
+          - page
+          - filter
+      type: object
+      properties:
+        page:          
+          type: object
+          example: 3
+        filter:
+          type: string
+          example: "ColumnName = 'Example Filter Text'"   
     ApiResponse:
       type: object
       properties:
@@ -1486,15 +1810,7 @@ components:
         message:
           type: string
       xml:
-        name: '##default'
-    Feed:
-      type: object
-      properties:
-        type:
-          type: integer
-          format: int8
-        page:
-          type: object
+        name: '##default'       
   securitySchemes:
     valuedIn_auth:
       type: oauth2
