@@ -40,7 +40,7 @@ paths:
           description: Success
         '404':
           description: Incorrect data provided
-
+          
     post:
       tags:
       - Authentication
@@ -97,17 +97,24 @@ paths:
           application/xml:
             schema:
               $ref: '#/components/schemas/NewUser'
+
           application/x-www-form-urlencoded:
             schema:
               $ref: '#/components/schemas/NewUser'
         description: Created user object
         required: true
+
       responses:
         '200':
           description: Success 
+
           content:
+            application/xml:
+              schema:
+                type: string
             application/json:
               schema:
+
                 $ref: '#/components/schemas/NewUser'
             application/xml:
               schema:
@@ -117,6 +124,7 @@ paths:
                 $ref: '#/components/schemas/NewUser'  
         '404':
           description: Incorrect data provided      
+
   /auth/passwordreset:
     post:
       tags:
@@ -133,6 +141,7 @@ paths:
       - valuedIn_auth:
           - write:users  
           - read:users
+
   /auth/passwordchange:
     post:
       tags:
@@ -291,7 +300,6 @@ paths:
         - valuedIn_auth:
             - 'write:users'
             - 'read:users'  
-         
     delete:
       tags:
         - Users
@@ -310,6 +318,7 @@ paths:
           description: Invalid ID supplied
         '404':
           description: User not found 
+
   /users/{id}/cv:
     post:
       tags:
@@ -348,11 +357,12 @@ paths:
         - valuedIn_auth:
             - write:users
             - read:users    
-    
+            
 # Organizations management
           
   /organizations:
     get:
+
       tags:
         - Organizations
       summary: List all Organizations
@@ -416,11 +426,13 @@ paths:
       parameters:
       - name: feedToken
         in: query
+
         required: true
         schema:
           type: string
       responses:
         '200':
+
           description: Success
           content:
             application/json:
@@ -669,6 +681,7 @@ paths:
         required: true
         schema:
           type: string
+
       responses:
         '200':
           description: successful operation
@@ -954,6 +967,7 @@ paths:
         '404':
           description: Organization not found  
 
+
   /jobs/{id}/applications:
     get:
       tags:
@@ -965,6 +979,7 @@ paths:
         - name: id
           in: path
           description: ID of job to return applicants
+
           required: true
           schema:
             type: integer
@@ -1190,7 +1205,7 @@ paths:
         '403':
           description: Unauthenticated user
         '404':
-          description: Incorrect data provided
+          description: Chat not found
       security:
         - valuedIn_auth:
             - write:chats
@@ -1342,6 +1357,7 @@ components:
         newPassword:
           type: string
           nullable: false
+
     UpdatedUser:
       type: object
       properties:
@@ -1434,6 +1450,7 @@ components:
           format: int32
           readOnly: true
       additionalProperties: false  
+      
     UserFeedInfoPage:
       type: object
       properties:
@@ -1720,6 +1737,7 @@ components:
           readOnly: true
       additionalProperties: false 
     AppInfoPage:
+
       type: object
       properties:
         results:
@@ -1952,6 +1970,7 @@ components:
     FeedInfoPage:
       type: object
       properties:
+
         results:
           type: array
           items:
