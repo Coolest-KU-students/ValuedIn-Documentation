@@ -8,3 +8,6 @@ ValuedIn is a professional social media based platform, that encourages honest a
 
 Also provided preliminary Database model for the project:
 ![Database Model](DBModel.drawio.png)
+
+And A proposed Component model: 
+![Component Model](ComponentModel.png)
