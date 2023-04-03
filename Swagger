@@ -11,27 +11,27 @@ servers:
     url: https://virtserver.swaggerhub.com/iramasauskas/ValuedIn/1.0.0
   - url: https://valuedin.swagger.io/api/v3
 tags:
-  - name: auth
-    description: Operations to manage user credentials
-  - name: users
+  - name: Authentication
+    description: Operations to manage user authentication
+  - name: Users
     description: Operations to manage users
-  - name: organizations
+  - name: Organizations
     description: Operations to manage organizations
-  - name: values
+  - name: Values
     description: Operations to manage values
-  - name: jobs
+  - name: Jobs
     description: Operations to manage jobs
-  - name: chats
+  - name: Chats
     description: Operations to manage chats
-  - name: feed
+  - name: Feed
     description: Operations to manage feed
+  - name: Web Sockets
+    description: Operations to manage web socket connections
 paths:
-# User credentials
-
   /auth:
     get:
       tags:
-      - auth
+      - Authentication
       summary: Check authentication
       description: Check authentication
       operationId: checkAuth
@@ -40,104 +40,25 @@ paths:
           description: Success
         '404':
           description: Incorrect data provided
-                
-    post:
-      tags:
-      - auth
-      summary: Register User account
-      description: Register User account
-      operationId: regUser
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/NewUser'
-          application/xml:
-            schema:
-              $ref: '#/components/schemas/NewUser'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/NewUser'
-        description: Created user object
-        required: true
-      responses:
-        '200':
-          description: Success 
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/NewUser'
-            application/xml:
-              schema:
-                $ref: '#/components/schemas/NewUser'
-            application/x-www-form-urlencoded:
-              schema:
-                $ref: '#/components/schemas/NewUser'  
-        '404':
-          description: Incorrect data provided      
-        
-        
-  /auth/sys:
-    post:
-      tags:
-      - auth
-      summary: Register User account for System Admin
-      description: Register User account for System Admin
-      operationId: regSysUser
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/NewUser'
-          application/xml:
-            schema:
-              $ref: '#/components/schemas/NewUser'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/NewUser'
-        description: Created user object
-        required: true
-      responses:
-        '200':
-          description: Success 
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/NewUser'
-            application/xml:
-              schema:
-                $ref: '#/components/schemas/NewUser'
-            application/x-www-form-urlencoded:
-              schema:
-                $ref: '#/components/schemas/NewUser'  
-        '404':
-          description: Incorrect data provided 
           
-  /auth/login:
-    get:
+    post:
       tags:
-      - auth
+      - Authentication
       summary: Login by user
-      description: Login by user
-      operationId: logUser
-      parameters:
-        - name: login
-          in: query
-          description: The user name for login
-          required: true
-          schema:
-            type: string
-        - name: password
-          in: query
-          description: The password for login in clear text
-          required: true
-          schema:
-            type: string
-        - name: rememberMe
-          in: query
-          required: false
-          schema:
-            type: boolean
+      description: Log in by user
+      operationId: logINUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthRequest'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/AuthRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AuthRequest'
+        description: Log in request
       responses:
         '200':
           description: successful operation
@@ -161,42 +82,93 @@ paths:
                 type: string
         '400':
           description: Invalid username/password supplied
-                
+  /auth/register:       
+    post:
+      tags:
+      - Authentication
+      summary: Register User account
+      description: Register User account
+      operationId: regUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewUser'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/NewUser'
+
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/NewUser'
+        description: Created user object
+        required: true
+
+      responses:
+        '200':
+          description: Success 
+
+          content:
+            application/xml:
+              schema:
+                type: string
+            application/json:
+              schema:
+
+                $ref: '#/components/schemas/NewUser'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/NewUser'
+            application/x-www-form-urlencoded:
+              schema:
+                $ref: '#/components/schemas/NewUser'  
+        '404':
+          description: Incorrect data provided      
+
   /auth/passwordreset:
     post:
       tags:
-        - auth
+        - Authentication
       summary: Reset password
       description: Reset the password for the user
       operationId: resetPass
       responses:
         '200':
-          description: Success  
+          description: Success
+        '407':
+          description: Not logged in
       security:
       - valuedIn_auth:
           - write:users  
           - read:users
-          
+
   /auth/passwordchange:
     post:
       tags:
-        - auth
-      summary: Change password
+        - Authentication
+      summary: Change password 
       description: This can only be done by the logged in user.
       operationId: changePass 
-      parameters:
-        - name: email
-          in: query
-          description: Email address for password change
-          required: true
-          schema:
-            type: string
-        
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewPassword'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/NewPassword'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/NewPassword'
+        description: Created user object
+        required: true
       responses:
         '200':
           description: Success
-        '404':
+        '400':
           description: Incorrect data provided
+        '401':
+          description: Not logged in
       security:
       - valuedIn_auth:
           - write:users  
@@ -207,10 +179,16 @@ paths:
   /users:
     get:
       tags:
-      - users
+      - Users
       summary: List all Users
       description: This can only be done by the logged system admin.
       operationId: listUsers
+      parameters:
+      - name: pageToken
+        in: query
+        required: true
+        schema:
+          type: string
       responses:
         '200':
           description: Success
@@ -233,10 +211,16 @@ paths:
   /users/feed:
     get:
       tags:
-        - users
+        - Users
       summary: List all Feed elements of Users
       description: This can only be done by the logged in user.
       operationId: listFeedUsers
+      parameters:
+      - name: feedToken
+        in: query
+        required: true
+        schema:
+          type: string
       responses:
         '200':
           description: Success
@@ -259,7 +243,7 @@ paths:
   /users/{id}:
     get:
       tags:
-      - users
+      - Users
       summary: View User
       description: This can only be done by system admin.
       operationId: viewUser
@@ -275,7 +259,7 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/UserSystemInfo"
+                $ref: "#/components/schemas/UserSystemInfo"
         '400':
           description: Invalid ID supplied
         '404':
@@ -288,7 +272,7 @@ paths:
  
     put:
       tags:
-      - users
+      - Users
       summary: Update User
       description: This can only be done by the logged in user.
       operationId: updateUser
@@ -316,11 +300,29 @@ paths:
         - valuedIn_auth:
             - 'write:users'
             - 'read:users'  
-         
+    delete:
+      tags:
+        - Users
+      summary: Expire User
+      description: Expire User by ID
+      operationId: expireUser
+      parameters:
+      - name: id
+        in: path
+        description: ID of user to expire
+        required: true
+        schema:
+          type: string
+      responses:
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: User not found 
+
   /users/{id}/cv:
     post:
       tags:
-        - users
+        - Users
       summary: Upload CV for User
       description: This can only be done by the logged in user.
       operationId: uploadCV
@@ -356,65 +358,22 @@ paths:
             - write:users
             - read:users    
             
-  /users/sys/{id}:
-    put:
-      tags:
-      - users
-      summary: Update User (for sys admin)
-      description: This can only be done by the system admin.
-      operationId: updateUserSys
-      parameters:
-      - name: id
-        in: path
-        required: true
-        schema:
-          type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              "$ref": "#/components/schemas/UpdatedUser"
-        required: true      
-      responses:
-        '200':
-          description: Success
-        '400':
-          description: Invalid ID supplied
-        '404':
-          description: User not found
-      security:
-        - api_key: []
-        - valuedIn_auth:
-            - 'write:users'
-            - 'read:users'   
-    delete:
-      tags:
-        - users
-      summary: Expire User
-      description: Expire User by ID
-      operationId: expireUser
-      parameters:
-      - name: id
-        in: path
-        description: ID of user to expire
-        required: true
-        schema:
-          type: string
-      responses:
-        '400':
-          description: Invalid ID supplied
-        '404':
-          description: User not found 
-      
 # Organizations management
           
   /organizations:
     get:
+
       tags:
-        - organizations
+        - Organizations
       summary: List all Organizations
       description: List all Organizations
       operationId: listOrg
+      parameters:
+      - name: pageToken
+        in: query
+        required: true
+        schema:
+          type: string
       responses:
         '200':
           description: Success
@@ -436,7 +395,7 @@ paths:
     
     post:
       tags:
-        - organizations
+        - Organizations
       summary: Add a new organization to the social network
       description: Add a new organization to the social network
       operationId: createOrg
@@ -460,12 +419,20 @@ paths:
   /organizations/feed:
     get:
       tags:
-        - organizations
+        - Organizations
       summary: List all Feed elements of Organizations
       description: List all Feed elements of Organizations
       operationId: listFeedOrg
+      parameters:
+      - name: feedToken
+        in: query
+
+        required: true
+        schema:
+          type: string
       responses:
         '200':
+
           description: Success
           content:
             application/json:
@@ -482,12 +449,11 @@ paths:
       security:
       - valuedIn_auth:
           - read:users
-  
             
   /organizations/{id}:
     get:
       tags:
-        - organizations
+        - Organizations
       summary: Find organization by ID
       description: Returns a single organization
       operationId: viewOrg
@@ -517,7 +483,7 @@ paths:
             - 'read:organizations'
     put:
       tags:
-        - organizations
+        - Organizations
       summary: Update Organization
       description: Update an existing organization by Id
       operationId: updateOrg
@@ -554,7 +520,7 @@ paths:
             - 'read:organizations'  
     delete:
       tags:
-        - organizations
+        - Organizations
       summary: Archive Organization
       description: Archive an existent organization in social
       operationId: archiveOrg
@@ -575,7 +541,7 @@ paths:
   /organizations/{id}/employees:
     get:
       tags:
-        - organizations
+        - Organizations
       summary: List all Organization Employees
       description: List all Organization Employees
       operationId: listOrgEmp
@@ -587,6 +553,11 @@ paths:
           schema:
             type: integer
             format: int64
+        - name: pageToken
+          in: query
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           description: Successful operation
@@ -608,7 +579,7 @@ paths:
   /organizations/{id}/valuehistory:
     post:
       tags:
-        - organizations
+        - Organizations
       summary: View Organization Value history
       description: This can only be done by the logged in user.
       operationId: viewValueHis
@@ -646,7 +617,7 @@ paths:
   /organizations/{id}/jobs:
     get:
       tags:
-        - organizations
+        - Organizations
       summary: View Organization Jobs
       description: View Organization Jobs
       operationId: viewOrgJob
@@ -658,6 +629,11 @@ paths:
           schema:
             type: integer
             format: int64
+        - name: pageToken
+          in: query
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           description: Successful operation
@@ -678,7 +654,7 @@ paths:
   /organizations/request:
     post:
       tags:
-        - organizations
+        - Organizations
       summary: Request new Company Registration
       description: Request new Company Registration
       operationId: requestReg
@@ -695,10 +671,17 @@ paths:
   /values:
     get:
       tags:
-        - values
+        - Values
       summary: List all Values
       description: List all existing values
       operationId: listValues
+      parameters:
+      - name: pageToken
+        in: query
+        required: true
+        schema:
+          type: string
+
       responses:
         '200':
           description: successful operation
@@ -713,7 +696,7 @@ paths:
             - read:values  
     put:
       tags:
-        - values
+        - Values
       summary: Update Value
       description: Update an existent value in social network
       operationId: updateValues
@@ -749,7 +732,7 @@ paths:
             - read:values  
     post:
       tags:
-        - values
+        - Values
       summary: Create new Value for Sys Admin
       description: This can only be done by system admin.
       operationId: sysCreateValue
@@ -778,7 +761,7 @@ paths:
             
     delete:
       tags:
-        - values
+        - Values
       summary: Archive Value
       description: This can only be done by the System Admin.
       operationId: archValue
@@ -801,10 +784,16 @@ paths:
   /jobs:
     get:
       tags:
-        - jobs
+        - Jobs
       summary: List all Jobs
       description: List all existing jobs
       operationId: listJobs
+      parameters:
+      - name: pageToken
+        in: query
+        required: true
+        schema:
+          type: string
       responses:
         '200':
           description: Success
@@ -827,10 +816,16 @@ paths:
   /jobs/feed:
     get:
       tags:
-        - jobs
+        - Jobs
       summary: List all Feed elements of Jobs
       description: This can only be done by the logged in user.
       operationId: listFeedJobs
+      parameters:
+      - name: feedToken
+        in: query
+        required: true
+        schema:
+          type: string
       responses:
         '200':
           description: Success
@@ -853,7 +848,7 @@ paths:
   /jobs/{id}:
     post:
       tags:
-        - jobs
+        - Jobs
       summary: Create new Job
       description: This can only be done by HR role.
       operationId: createJob
@@ -887,7 +882,7 @@ paths:
             - read:jobs
     get:
       tags:
-        - jobs
+        - Jobs
       summary: View Job
       description: This can only be done by the logged in user.
       operationId: viewJob
@@ -917,7 +912,7 @@ paths:
             - 'read:jobs'
     put:
       tags:
-        - jobs
+        - Jobs
       summary: Update Job
       description: This can only be done by HR role.
       operationId: updateJob
@@ -954,7 +949,7 @@ paths:
 
     delete:
       tags:
-        - jobs
+        - Jobs
       summary: Archive Job
       description: This can only be done by the logged in user.
       operationId: archJob
@@ -972,10 +967,41 @@ paths:
         '404':
           description: Organization not found  
 
-  /jobs/{id}/application:
+
+  /jobs/{id}/applications:
+    get:
+      tags:
+        - Jobs
+      summary: View applicants to Job
+      description: This can only be done by the logged in user.
+      operationId: viewAppJob
+      parameters:
+        - name: id
+          in: path
+          description: ID of job to return applicants
+
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AppInfoPage'
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Applicant not found
+      security:
+        - valuedIn_auth:
+            - read:applicants  
+            
     post:
       tags:
-        - jobs
+        - Jobs
       summary: Apply to Job
       description: This can only be done by the logged in user.
       operationId: applyJob
@@ -1003,10 +1029,32 @@ paths:
             - write:jobs
             - read:jobs  
 
-  /jobs/{id}/bookmark:
+  /jobs/bookmarks:
+    get:
+      tags:
+        - Jobs
+      summary: View bookmarked Jobs
+      description: This can only be done by the logged in user.
+      operationId: viewBookJob
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobInfoPage'
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Applicant not found
+      security:
+        - valuedIn_auth:
+            - read:jobs  
+
+  /jobs/bookmarks/{id}:
     post:
       tags:
-        - jobs
+        - Jobs
       summary: Bookmark Job
       description: This can only be done by the logged in user.
       operationId: bookJob
@@ -1033,18 +1081,17 @@ paths:
         - valuedIn_auth:
             - write:jobs
             - read:jobs  
-
-  /jobs/{id}/applicants:
-    get:
+            
+    delete:
       tags:
-        - jobs
-      summary: View applicants to Job
+        - Jobs
+      summary: Un-bookmark Job
       description: This can only be done by the logged in user.
-      operationId: viewAppJob
+      operationId: unbookJob
       parameters:
         - name: id
           in: path
-          description: ID of job to return applicants
+          description: ID of job to un-bookmark
           required: true
           schema:
             type: integer
@@ -1055,91 +1102,118 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AppInfoPage'
+                $ref: '#/components/schemas/Job'
         '400':
           description: Invalid ID supplied
         '404':
-          description: Applicant not found
+          description: Job was not found
       security:
         - valuedIn_auth:
-            - read:applicants  
-            
-# Chat management
+            - write:jobs
+            - read:jobs 
+
+  
+# Web Socket management
 
   /ws:
     get:
       tags:
-        - chats
+        - Web Sockets
       summary: Establish Web Socket
       description: Establish Web Socket
       operationId: webSocket
       responses:
         '200':
           description: Success  
+        '402':
+          description: Expired token
         '403':
           description: Unauthenticated user
-
+  /ws/token:
+    get:
+      tags:
+        - Web Sockets
+      summary: Provides a web socket token
+      description: Provides a token for the user to establish a web socket
+      operationId: webSocketToekn
+      responses:
+        '200':
+          description: Success  
+        '403':
+          description: Unauthenticated user
+# Chat management
   /chats:
     get:
       tags:
-        - chats
+        - Chats
       summary: List all Chats
       description: This can only be done by the logged in user.
       operationId: listChats
+      parameters:
+      - name: pageToken
+        in: query
+        required: true
+        schema:
+          type: string
       responses:
         '200':
           description: Success
           content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/ChatInfoPage'
             application/json:
               schema:
                 $ref: '#/components/schemas/ChatInfoPage'
-            application/xml:
+            text/json:
               schema:
                 $ref: '#/components/schemas/ChatInfoPage'
-            application/x-www-form-urlencoded:
-              schema:
-                $ref: '#/components/schemas/ChatInfoPage'  
-        '403':
-          description: Unauthenticated user
-      security:
-      - valuedIn_auth:
-          - read:jobs 
-    post:
-      tags:
-        - chats
-      summary: Create Chat
-      description: This can only be done by the logged in user.
-      operationId: createChat
-      parameters:
-        - name: firstName
-          in: query
-          description: First name of user to chat with
-          required: true
-          schema:
-            type: string
-        - name: lastName
-          in: query
-          description: Last name of user to chat with
-          required: true
-          schema:
-            type: string
-      
-      responses:
-        '200':
-          description: Successful operation
-        '403':
-          description: Unauthenticated user
-        '404':
-          description: Incorrect data provided
       security:
         - valuedIn_auth:
             - write:chats
-            - read:chats       
-
+            - read:chats 
+    post:
+      tags:
+        - Chats
+      summary: Create Chat
+      description: This can only be done by the logged in user.
+      operationId: createChat
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewChatRequest'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/NewChatRequest'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/NewChatRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/Chat'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Chat'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/Chat'
+        '403':
+          description: Unauthenticated user
+        '404':
+          description: Chat not found
+      security:
+        - valuedIn_auth:
+            - write:chats
+            - read:chats 
   /chats/{id}:
     get:
       tags:
-        - chats
+        - Chats
       summary: View Chat
       description: This can only be done by the logged in user.
       operationId: viewChat
@@ -1151,43 +1225,63 @@ paths:
           schema:
             type: integer
             format: int64
+        - name: pageToken
+          in: query
+          required: true
+          schema:
+            type: string
       responses:
         '200':
-          description: Successful operation
+          description: Success
           content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/MessageDTODateTimeOffsetPage'
             application/json:
               schema:
-                $ref: '#/components/schemas/Chat'          
-        '403':
-          description: Unauthenticated user
-        '404':
-          description: Chat not found
-      security:
-        - valuedIn_auth:
-            - write:chats
-            - read:chats 
-
-  /chats/message:
+                $ref: '#/components/schemas/MessageDTODateTimeOffsetPage'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/MessageDTODateTimeOffsetPage'
     post:
       tags:
-        - chats
+        - Chats
       summary: Create a Message in Chat
       description: This can only be done by the logged in user.
       operationId: createMsg
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
       requestBody:
         description: Provide message content
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Message'
-        required: true
+              $ref: '#/components/schemas/NewMessage'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/NewMessage'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/NewMessage'
       responses:
         '200':
-          description: Successful operation
+          description: Success
           content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/ChatMessage'
             application/json:
               schema:
-                $ref: '#/components/schemas/Message'          
+                $ref: '#/components/schemas/ChatMessage'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/ChatMessage'
+                  
         '403':
           description: Unauthenticated user
         '404':
@@ -1196,13 +1290,15 @@ paths:
         - valuedIn_auth:
             - write:messages
             - read:messages
+                
+
           
 # Feed management
 
   /feed:
     get:
       tags:
-        - feed
+        - Feed
       summary: List all Feed elements
       description: This can only be done by the logged in user.
       operationId: listFeed
@@ -1232,26 +1328,36 @@ components:
       properties:
         login:
           type: string
-          nullable: true
+          nullable: false
         role:
           type: string
           nullable: true
         firstName:
           type: string
-          nullable: true
+          nullable: false
         lastName:
           type: string
-          nullable: true
+          nullable: false
         password:
           type: string
-          nullable: true
+          nullable: false
         email:
           type: string
-          nullable: true
+          nullable: false
         telephone:
           type: string
-          nullable: true
+          nullable: false
       additionalProperties: false
+    NewPassword:
+      type: object
+      properties:
+        oldPassword:
+          type: string
+          nullable: true
+        newPassword:
+          type: string
+          nullable: false
+
     UpdatedUser:
       type: object
       properties:
@@ -1344,6 +1450,7 @@ components:
           format: int32
           readOnly: true
       additionalProperties: false  
+      
     UserFeedInfoPage:
       type: object
       properties:
@@ -1630,6 +1737,7 @@ components:
           readOnly: true
       additionalProperties: false 
     AppInfoPage:
+
       type: object
       properties:
         results:
@@ -1685,83 +1793,184 @@ components:
       properties:
         name:
           type: string
-          nullable: true
+          nullable: true   
     Chat:
+      required:
+        - messages
+        - participants
       type: object
       properties:
-        firstName:
+        createdOn:
+          type: string
+          format: date-time
+        createdBy:
           type: string
           nullable: true
-        lastName:
-          type: string
-          nullable: true
-        lastMessage:
-          type: string
-          nullable: true
-        lastMessageDate:
-          type: string
-          format: date
+        id:
+          type: integer
+          format: int64
+        messages:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChatMessage'
+        participants:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChatParticipant'
+      additionalProperties: false
       xml:
-        name: chat    
-    Chats:
+        name: chat
+    ChatInfo:
       type: object
       properties:
         id:
           type: integer
           format: int64
-          example: 1
-        firstName:
+        chatName:
           type: string
           nullable: true
-        lastName:
-          type: string
+        participatingUsers:
+          type: array
+          items:
+            type: string
           nullable: true
         lastMessage:
           type: string
-          nullable: true
-        lastMessageDate:
+          format: date-time
+        lastMessageContent:
           type: string
-          format: date
-      xml:
-        name: chat
+          nullable: true
+        unread:
+          type: boolean
+      additionalProperties: false
     ChatInfoPage:
       type: object
       properties:
         results:
           type: array
           items:
-            "$ref": "#/components/schemas/Chats"
+            $ref: '#/components/schemas/ChatInfo'
           nullable: true
-        total:
-          type: integer
-          format: int32
-        pageNo:
-          type: integer
-          format: int32
-        count:
-          type: integer
-          format: int32
-          readOnly: true
-      additionalProperties: false     
-    Message:
+        nextOffset:
+          type: string
+          format: date-time
+        last:
+          type: boolean
+      additionalProperties: false
+    ChatMessage:
       required:
-        - name
+        - chatId
+        - message
       type: object
       properties:
-        name:
+        createdOn:
           type: string
-          example: Jack Black
-        isAuthor:
+          format: date-time
+        createdBy:
+          type: string
+          nullable: true
+        id:
+          type: integer
+          format: int64
+        chatId:
+          type: integer
+          format: int64
+        message:
+          minLength: 1
+          type: string
+      additionalProperties: false
+    ChatParticipant:
+      required:
+        - chatId
+      type: object
+      properties:
+        createdOn:
+          type: string
+          format: date-time
+        createdBy:
+          type: string
+          nullable: true
+        updatedOn:
+          type: string
+          format: date-time
+          nullable: true
+        updatedBy:
+          type: string
+          nullable: true
+        userId:
+          maxLength: 128
+          type: string
+          nullable: true
+        chatId:
+          type: integer
+          format: int64
+        chat:
+          $ref: '#/components/schemas/Chat'
+      additionalProperties: false
+    MessageDTO:
+      required:
+        - content
+        - id
+        - sent
+        - sentByFirstName
+        - sentByLastName
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        sentByFirstName:
+          minLength: 1
+          type: string
+        sentByLastName:
+          minLength: 1
+          type: string
+        content:
+          minLength: 1
+          type: string
+        sent:
+          type: string
+          format: date-time
+        unread:
           type: boolean
-          example: True
+      additionalProperties: false
+    MessageDTODateTimeOffsetPage:
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/MessageDTO'
+          nullable: true
+        nextOffset:
+          type: string
+          format: date-time
+        last:
+          type: boolean
+      additionalProperties: false
+    NewChatRequest:
+      type: object
+      properties:
+        participants:
+          type: array
+          items:
+            type: string
+          nullable: true
         messageContent:
           type: string
-          example: Lorem Ipsum
-      xml:
-        name: message
+          nullable: true
+      additionalProperties: false
+    NewMessage:
+      type: object
+      properties:
+        content:
+          type: string
+          nullable: true
+      additionalProperties: false
     FeedInfoPage:
       type: object
       properties:
+
         results:
           type: array
           items:
@@ -1799,6 +2008,17 @@ components:
         filter:
           type: string
           example: "ColumnName = 'Example Filter Text'"   
+    AuthRequest:
+      type: object
+      properties:
+        login:
+          type: string
+        password:
+          type: string
+        rememberMe:
+          type: boolean
+          nullable: true
+      additionalProperties: false   
     ApiResponse:
       type: object
       properties:
@@ -1816,7 +2036,7 @@ components:
       type: oauth2
       flows:
         implicit:
-          authorizationUrl: https://valuedin.com/auth/login
+          authorizationUrl: https://valuedin.com/auth
           scopes:
             write:messages: modify messages
             read:messages: read messages
