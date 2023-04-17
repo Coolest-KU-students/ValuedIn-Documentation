@@ -13,20 +13,48 @@ servers:
 tags:
   - name: Authentication
     description: Operations to manage user authentication
+  - name: Registration
+    description: Operations to register users
+  - name: Password Reset
+    description: Operations to reset password
+  - name: Password Change
+    description: Operations to change password
   - name: Users
     description: Operations to manage users
+  - name: CV
+    description: Operations to upload CV to user profile
   - name: Organizations
     description: Operations to manage organizations
+  - name: Organization Jobs
+    description: Operations to manage jobs og organizations
+  - name: Employees
+    description: Operations to manage employees of organizations
+  - name: Value History  
+    description: Operations to manage history of values in organization
+  - name: Request Registration
+    description: Operations to request a registration of organization
   - name: Values
     description: Operations to manage values
   - name: Jobs
     description: Operations to manage jobs
+  - name: Applications
+    description: Operations to manage user applications to jobs
+  - name: Bookmarks
+    description: Operations to manage user bookmarks of jobs
   - name: Chats
     description: Operations to manage chats
   - name: Feed
     description: Operations to manage feed
+  - name: Users Feed
+    description: Operations to manage users feed
+  - name: Organizations Feed
+    description: Operations to manage organizations feed
+  - name: Jobs Feed
+    description: Operations to manage jobs feed  
   - name: Web Sockets
     description: Operations to manage web socket connections
+  - name: Token
+    description: Operations to manage web socket tokens
 paths:
   /auth:
     get:
@@ -82,10 +110,10 @@ paths:
                 type: string
         '400':
           description: Invalid username/password supplied
-  /auth/register:       
+  /register:       
     post:
       tags:
-      - Authentication
+      - Registration
       summary: Register User account
       description: Register User account
       operationId: regUser
@@ -109,9 +137,6 @@ paths:
           description: Success 
 
           content:
-            application/xml:
-              schema:
-                type: string
             application/json:
               schema:
 
@@ -125,10 +150,10 @@ paths:
         '404':
           description: Incorrect data provided      
 
-  /auth/passwordreset:
+  /passwordreset:
     post:
       tags:
-        - Authentication
+        - Password Reset
       summary: Reset password
       description: Reset the password for the user
       operationId: resetPass
@@ -142,10 +167,10 @@ paths:
           - write:users  
           - read:users
 
-  /auth/passwordchange:
+  /passwordchange:
     post:
       tags:
-        - Authentication
+        - Password Change
       summary: Change password 
       description: This can only be done by the logged in user.
       operationId: changePass 
@@ -202,38 +227,6 @@ paths:
             application/x-www-form-urlencoded:
               schema:
                 $ref: '#/components/schemas/UserSystemInfoPage'  
-        '403':
-          description: Unauthenticated user
-      security:
-      - valuedIn_auth:
-          - read:users  
-                
-  /users/feed:
-    get:
-      tags:
-        - Users
-      summary: List all Feed elements of Users
-      description: This can only be done by the logged in user.
-      operationId: listFeedUsers
-      parameters:
-      - name: feedToken
-        in: query
-        required: true
-        schema:
-          type: string
-      responses:
-        '200':
-          description: Success
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UserFeedInfoPage'
-            application/xml:
-              schema:
-                $ref: '#/components/schemas/UserFeedInfoPage'
-            application/x-www-form-urlencoded:
-              schema:
-                $ref: '#/components/schemas/UserFeedInfoPage'  
         '403':
           description: Unauthenticated user
       security:
@@ -319,10 +312,10 @@ paths:
         '404':
           description: User not found 
 
-  /users/{id}/cv:
+  /cv/{id}:
     post:
       tags:
-        - Users
+        - CV
       summary: Upload CV for User
       description: This can only be done by the logged in user.
       operationId: uploadCV
@@ -416,39 +409,6 @@ paths:
         '404':
           description: Incorrect data provided    
         
-  /organizations/feed:
-    get:
-      tags:
-        - Organizations
-      summary: List all Feed elements of Organizations
-      description: List all Feed elements of Organizations
-      operationId: listFeedOrg
-      parameters:
-      - name: feedToken
-        in: query
-
-        required: true
-        schema:
-          type: string
-      responses:
-        '200':
-
-          description: Success
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/OrgFeedInfoPage'
-            application/xml:
-              schema:
-                $ref: '#/components/schemas/OrgFeedInfoPage'
-            application/x-www-form-urlencoded:
-              schema:
-                $ref: '#/components/schemas/OrgFeedInfoPage'  
-        '403':
-          description: Unauthenticated user
-      security:
-      - valuedIn_auth:
-          - read:users
             
   /organizations/{id}:
     get:
@@ -538,10 +498,10 @@ paths:
         '404':
           description: Organization not found 
 
-  /organizations/{id}/employees:
+  /employees/{id}:
     get:
       tags:
-        - Organizations
+        - Employees
       summary: List all Organization Employees
       description: List all Organization Employees
       operationId: listOrgEmp
@@ -576,10 +536,10 @@ paths:
             - read:organizations
             - read:employees
     
-  /organizations/{id}/valuehistory:
+  /valuehistory/{id}:
     post:
       tags:
-        - Organizations
+        - Value History
       summary: View Organization Value history
       description: This can only be done by the logged in user.
       operationId: viewValueHis
@@ -613,48 +573,11 @@ paths:
         - valuedIn_auth:
             - write:organizations
             - read:organizations
-
-  /organizations/{id}/jobs:
-    get:
-      tags:
-        - Organizations
-      summary: View Organization Jobs
-      description: View Organization Jobs
-      operationId: viewOrgJob
-      parameters:
-        - name: id
-          in: path
-          description: ID of organization to return open job positions
-          required: true
-          schema:
-            type: integer
-            format: int64
-        - name: pageToken
-          in: query
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/JobInfoPage'        
-        '400':
-          description: Invalid ID supplied
-        '404':
-          description: Organization not found
-      security:
-        - valuedIn_auth:
-            - write:organizations
-            - read:organizations
-            - read:jobs
             
-  /organizations/request:
+  /request:
     post:
       tags:
-        - Organizations
+        - Request Registration
       summary: Request new Company Registration
       description: Request new Company Registration
       operationId: requestReg
@@ -812,38 +735,6 @@ paths:
       security:
       - valuedIn_auth:
           - read:jobs 
-
-  /jobs/feed:
-    get:
-      tags:
-        - Jobs
-      summary: List all Feed elements of Jobs
-      description: This can only be done by the logged in user.
-      operationId: listFeedJobs
-      parameters:
-      - name: feedToken
-        in: query
-        required: true
-        schema:
-          type: string
-      responses:
-        '200':
-          description: Success
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/JobInfoPage'
-            application/xml:
-              schema:
-                $ref: '#/components/schemas/JobInfoPage'
-            application/x-www-form-urlencoded:
-              schema:
-                $ref: '#/components/schemas/JobInfoPage'  
-        '403':
-          description: Unauthenticated user
-      security:
-      - valuedIn_auth:
-          - read:jobs 
   
   /jobs/{id}:
     post:
@@ -967,11 +858,47 @@ paths:
         '404':
           description: Organization not found  
 
-
-  /jobs/{id}/applications:
+  /organizationjobs/{id}:
     get:
       tags:
-        - Jobs
+        - Organization Jobs
+      summary: View Organization Jobs
+      description: View Organization Jobs
+      operationId: viewOrgJob
+      parameters:
+        - name: id
+          in: path
+          description: ID of organization to return open job positions
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: pageToken
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobInfoPage'        
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Organization not found
+      security:
+        - valuedIn_auth:
+            - write:organizations
+            - read:organizations
+            - read:jobs
+  
+  /applications{id}:
+    get:
+      tags:
+        - Applications
       summary: View applicants to Job
       description: This can only be done by the logged in user.
       operationId: viewAppJob
@@ -1001,7 +928,7 @@ paths:
             
     post:
       tags:
-        - Jobs
+        - Applications
       summary: Apply to Job
       description: This can only be done by the logged in user.
       operationId: applyJob
@@ -1029,10 +956,10 @@ paths:
             - write:jobs
             - read:jobs  
 
-  /jobs/bookmarks:
+  /bookmarks:
     get:
       tags:
-        - Jobs
+        - Bookmarks
       summary: View bookmarked Jobs
       description: This can only be done by the logged in user.
       operationId: viewBookJob
@@ -1051,10 +978,10 @@ paths:
         - valuedIn_auth:
             - read:jobs  
 
-  /jobs/bookmarks/{id}:
+  /bookmarks/{id}:
     post:
       tags:
-        - Jobs
+        - Bookmarks
       summary: Bookmark Job
       description: This can only be done by the logged in user.
       operationId: bookJob
@@ -1084,7 +1011,7 @@ paths:
             
     delete:
       tags:
-        - Jobs
+        - Bookmarks
       summary: Un-bookmark Job
       description: This can only be done by the logged in user.
       operationId: unbookJob
@@ -1129,13 +1056,13 @@ paths:
           description: Expired token
         '403':
           description: Unauthenticated user
-  /ws/token:
+  /token:
     get:
       tags:
-        - Web Sockets
+        - Token
       summary: Provides a web socket token
       description: Provides a token for the user to establish a web socket
-      operationId: webSocketToekn
+      operationId: webSocketToken
       responses:
         '200':
           description: Success  
@@ -1320,7 +1247,105 @@ paths:
       security:
         - valuedIn_auth:
             - read:feeds  
+    
+  /usersfeed:
+    get:
+      tags:
+        - Users Feed
+      summary: List all Feed elements of Users
+      description: This can only be done by the logged in user.
+      operationId: listFeedUsers
+      parameters:
+      - name: feedToken
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserFeedInfoPage'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/UserFeedInfoPage'
+            application/x-www-form-urlencoded:
+              schema:
+                $ref: '#/components/schemas/UserFeedInfoPage'  
+        '403':
+          description: Unauthenticated user
+      security:
+      - valuedIn_auth:
+          - read:users          
+  
+  /feed/organizationsfeed:
+    get:
+      tags:
+        - Organizations Feed
+      summary: List all Feed elements of Organizations
+      description: List all Feed elements of Organizations
+      operationId: listFeedOrg
+      parameters:
+      - name: feedToken
+        in: query
 
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrgFeedInfoPage'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/OrgFeedInfoPage'
+            application/x-www-form-urlencoded:
+              schema:
+                $ref: '#/components/schemas/OrgFeedInfoPage'  
+        '403':
+          description: Unauthenticated user
+      security:
+      - valuedIn_auth:
+          - read:organizations
+          
+  /jobsfeed:
+    get:
+      tags:
+        - Jobs Feed
+      summary: List all Feed elements of Jobs
+      description: This can only be done by the logged in user.
+      operationId: listFeedJobs
+      parameters:
+      - name: feedToken
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobInfoPage'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/JobInfoPage'
+            application/x-www-form-urlencoded:
+              schema:
+                $ref: '#/components/schemas/JobInfoPage'  
+        '403':
+          description: Unauthenticated user
+      security:
+      - valuedIn_auth:
+          - read:jobs        
+  
 components:
   schemas:
     NewUser:
